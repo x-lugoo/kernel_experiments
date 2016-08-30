@@ -1,4 +1,5 @@
 obj-m += hello.o
+obj-m += hello_param.o
 
 SRC=/lib/modules/$(shell uname -r)/build
 
