@@ -20,4 +20,4 @@ echo $major
 mknod /dev/${device}0 c $major 0
 chmod 777 /dev/${device}[0-3]
 
-dmesg -c
+dmesg -c >/dev/null
