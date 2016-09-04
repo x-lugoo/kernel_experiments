@@ -40,7 +40,6 @@ int scull_trim(struct scull_dev *dev)
 	int i;
 
 	pr_info("%s called\n", __func__);
-	return 0;
 	for (dptr = dev->qset_data; dptr; dptr = next) {
 		if (dptr->data) {
 			for (i = 0; i < qset; i++)
