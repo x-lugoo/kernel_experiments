@@ -8,9 +8,7 @@ if lsmod | grep $module >/dev/null; then
 	/sbin/rmmod $module
 fi
 
-# call insmod with all parameters 
-/sbin/insmod ./$module.ko $* || exit 1
-
+/sbin/insmod ./$module.ko scull_qset=10 scull_quantum=10 || exit 1
 # remove stale nodes
 rm -f /dev/${device}[0-3]
 
@@ -19,5 +17,3 @@ echo $major
 
 mknod /dev/${device}0 c $major 0
 chmod 777 /dev/${device}[0-3]
-
-dmesg -c >/dev/null
