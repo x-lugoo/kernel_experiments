@@ -1,4 +1,4 @@
-#include <asm/uaccess.h>
+#include <linux/uaccess.h>
 
 #include <linux/cdev.h>
 #include <linux/errno.h>
@@ -11,7 +11,7 @@
 #include <linux/slab.h>
 #include <linux/types.h>
 
-int scull_major = 0;
+int scull_major;
 int scull_count = 1;
 int scull_quantum = 5;
 module_param(scull_quantum, int, S_IRUGO);
@@ -64,7 +64,8 @@ struct scull_qset *scull_follow(struct scull_dev *dev, int item)
 	struct scull_qset *dptr = dev->qset_data;
 
 	if (!dptr) {
-		dptr = dev->qset_data = kzalloc(sizeof(struct scull_qset), GFP_KERNEL);
+		dptr = dev->qset_data = kzalloc(sizeof(struct scull_qset)
+						, GFP_KERNEL);
 		if (!dptr) {
 			pr_err("Could not allocate scull_qset1\n");
 			return NULL;
@@ -73,18 +74,18 @@ struct scull_qset *scull_follow(struct scull_dev *dev, int item)
 
 	while (item--) {
 		if (!dptr->next) {
-			dptr->next = kzalloc(sizeof(struct scull_qset), GFP_KERNEL);
-			if (!dptr->next) {
-				pr_err("Could not allocate scull_qset2\n");
+			dptr->next = kzalloc(sizeof(struct scull_qset)
+						, GFP_KERNEL);
+			if (!dptr->next)
 				return NULL;
-			}
 		}
 		dptr = dptr->next;
 	}
 	return dptr;
 }
 
-ssize_t scull_read(struct file *filp, char __user *buf, size_t count, loff_t *f_pos)
+ssize_t scull_read(struct file *filp, char __user *buf, size_t count
+			, loff_t *f_pos)
 {
 	struct scull_dev *dev = filp->private_data;
 	struct scull_qset *dptr; /* first listitem */
@@ -128,7 +129,8 @@ out:
 	return retval;
 }
 
-ssize_t scull_write(struct file *filp, const char __user *buf, size_t count, loff_t *f_pos)
+ssize_t scull_write(struct file *filp, const char __user *buf, size_t count
+			, loff_t *f_pos)
 {
 	struct scull_dev *dev = filp->private_data;
 	struct scull_qset *dptr;
@@ -152,7 +154,7 @@ ssize_t scull_write(struct file *filp, const char __user *buf, size_t count, lof
 		goto out;
 	}
 	if (!dptr->data) {
-		dptr->data = kzalloc(qset * sizeof(char *), GFP_KERNEL);
+		dptr->data = kcalloc(qset, sizeof(char *), GFP_KERNEL);
 		if (!dptr->data)
 			goto out;
 	}
@@ -201,7 +203,7 @@ int scull_open(struct inode *inode, struct file *filp)
 	return 0;
 }
 
-struct file_operations scull_fops = {
+const struct file_operations scull_fops = {
 	.owner =   THIS_MODULE,
 	//.llseek =  scull_llseek,
 	.read =    scull_read,
@@ -217,10 +219,8 @@ static int __init scull_init(void)
 	int ret = -ENOMEM;
 
 	scull_dev = kzalloc(sizeof(struct scull_dev), GFP_KERNEL);
-	if (!scull_dev) {
-		pr_err("Could not allocate scull_dev\n");
+	if (!scull_dev)
 		goto err;
-	}
 
 	scull_dev->quantum = scull_quantum;
 	scull_dev->qset = scull_qset;
@@ -241,7 +241,8 @@ static int __init scull_init(void)
 		goto unregister;
 	}
 
-	pr_info("%s load success. qset=%d and quantum=%d\n", __func__, scull_qset, scull_quantum);
+	pr_info("%s load success. qset=%d and quantum=%d\n", __func__
+		, scull_qset, scull_quantum);
 	return 0;
 
 unregister:
