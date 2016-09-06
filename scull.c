@@ -305,10 +305,12 @@ err:
 
 static void __exit scull_exit(void)
 {
-	scull_proc_exit();
+	pr_info("%s called\n", __func__);
+
+	kfree(scull_dev);
 	cdev_del(&scull_dev->cdev);
 	unregister_chrdev_region(MKDEV(scull_major, 0), scull_count);
-	pr_info("%s called\n", __func__);
+	scull_proc_exit();
 }
 
 module_init(scull_init);
