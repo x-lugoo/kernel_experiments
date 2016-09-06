@@ -217,6 +217,7 @@ static int __init scull_init(void)
 {
 	dev_t dev;
 	int ret = -ENOMEM;
+	char devt_fmt[15];
 
 	scull_dev = kzalloc(sizeof(struct scull_dev), GFP_KERNEL);
 	if (!scull_dev)
@@ -241,8 +242,8 @@ static int __init scull_init(void)
 		goto unregister;
 	}
 
-	pr_info("%s load success. qset=%d and quantum=%d\n", __func__
-		, scull_qset, scull_quantum);
+	pr_info("%s load success. dev=%s, qset=%d and quantum=%d\n", __func__
+		, format_dev_t(devt_fmt, dev), scull_qset, scull_quantum);
 	return 0;
 
 unregister:
