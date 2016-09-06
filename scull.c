@@ -7,7 +7,9 @@
 #include <linux/init.h>
 #include <linux/kernel.h>
 #include <linux/module.h>
+#include <linux/proc_fs.h>
 #include <linux/semaphore.h>
+#include <linux/seq_file.h>
 #include <linux/slab.h>
 #include <linux/types.h>
 
@@ -35,6 +37,7 @@ struct scull_dev {
 };
 
 struct scull_dev *scull_dev;
+static struct proc_dir_entry *scull_proc_dir;
 
 int scull_trim(struct scull_dev *dev)
 {
@@ -203,15 +206,55 @@ int scull_open(struct inode *inode, struct file *filp)
 	return 0;
 }
 
+static int scull_proc_show(struct seq_file *sf, void *v)
+{
+	seq_printf(sf, "%d\n", scull_major);
+	return 0;
+}
+
+static int scull_proc_open(struct inode *inode, struct file *file)
+{
+	return single_open(file, scull_proc_show, NULL);
+}
+
+static const struct file_operations scull_proc_ops = {
+	.owner = THIS_MODULE,
+	.open = scull_proc_open,
+	.read = seq_read,
+};
+
 const struct file_operations scull_fops = {
 	.owner =   THIS_MODULE,
-	//.llseek =  scull_llseek,
 	.read =    scull_read,
 	.write =   scull_write,
-	//.ioctl =   scull_ioctl,
 	.open =    scull_open,
 	.release = scull_release,
 };
+
+static int scull_proc_init(void)
+{
+	struct proc_dir_entry *entry;
+
+	scull_proc_dir = proc_mkdir("scull", NULL);
+	if (!scull_proc_dir)
+		return -ENOMEM;
+
+	entry = proc_create("major", 0, scull_proc_dir, &scull_proc_ops);
+	if (!entry)
+		goto fail;
+
+	return 0;
+
+fail:
+	remove_proc_entry("scull", NULL);
+	return -ENOMEM;
+}
+
+static void scull_proc_exit(void)
+{
+	remove_proc_entry("major", scull_proc_dir);
+	remove_proc_entry("scull", NULL);
+}
 
 static int __init scull_init(void)
 {
@@ -242,10 +285,15 @@ static int __init scull_init(void)
 		goto unregister;
 	}
 
+	if (scull_proc_init())
+		goto proc_err;
+
 	pr_info("%s load success. dev=%s, qset=%d and quantum=%d\n", __func__
 		, format_dev_t(devt_fmt, dev), scull_qset, scull_quantum);
 	return 0;
 
+proc_err:
+	scull_proc_exit();
 unregister:
 	cdev_del(&scull_dev->cdev);
 	unregister_chrdev_region(dev, scull_count);
@@ -257,6 +305,7 @@ err:
 
 static void __exit scull_exit(void)
 {
+	scull_proc_exit();
 	cdev_del(&scull_dev->cdev);
 	unregister_chrdev_region(MKDEV(scull_major, 0), scull_count);
 	pr_info("%s called\n", __func__);
