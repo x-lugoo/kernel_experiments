@@ -233,14 +233,11 @@ const struct file_operations scull_fops = {
 
 static int scull_proc_init(void)
 {
-	struct proc_dir_entry *entry;
-
 	scull_proc_dir = proc_mkdir("scull", NULL);
 	if (!scull_proc_dir)
 		return -ENOMEM;
 
-	entry = proc_create("major", 0, scull_proc_dir, &scull_proc_ops);
-	if (!entry)
+	if (!proc_create("major", 0, scull_proc_dir, &scull_proc_ops))
 		goto fail;
 
 	return 0;
