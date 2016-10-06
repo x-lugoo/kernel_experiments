@@ -10,3 +10,7 @@ Device Driver Notes
    - struct proc_dir_entry *proc_create(const char *name, umode_t mode, struct proc_dir_entry *parent,
                                           const struct file_operations *proc_fops);
    - void remove_proc_entry(const char *, struct proc_dir_entry *);
+   
+4. Sempahores:
+   - **down_interruptible** locks the sempahore, but available to be interrupted by signal
+   - **up** unlocks the semaphore
