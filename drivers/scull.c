@@ -13,6 +13,8 @@
 #include <linux/slab.h>
 #include <linux/types.h>
 
+#include "scull.h"
+
 int scull_major;
 int scull_count = 1;
 int scull_quantum = 5;
@@ -21,13 +23,13 @@ module_param(scull_quantum, int, S_IRUGO);
 int scull_qset = 10;
 module_param(scull_qset, int, S_IRUGO);
 
-struct scull_qset {
+struct _qset {
 	void **data;
-	struct scull_qset *next;
+	struct _qset *next;
 };
 
 struct scull_dev {
-	struct scull_qset *qset_data; /// Pointer to the first quantum set
+	struct _qset *qset_data; /// Pointer to the first quantum set
 	int quantum; /// current quantum size
 	int qset; /// current array size
 	unsigned long size; /// amount of data stored
@@ -41,7 +43,7 @@ static struct proc_dir_entry *scull_proc_dir;
 
 int scull_trim(struct scull_dev *dev)
 {
-	struct scull_qset *next, *dptr;
+	struct _qset *next, *dptr;
 	int qset = dev->qset; // dev is not null
 	int i;
 
@@ -62,12 +64,12 @@ int scull_trim(struct scull_dev *dev)
 	return 0;
 }
 
-struct scull_qset *scull_follow(struct scull_dev *dev, int item)
+struct _qset *scull_follow(struct scull_dev *dev, int item)
 {
-	struct scull_qset *dptr = dev->qset_data;
+	struct _qset *dptr = dev->qset_data;
 
 	if (!dptr) {
-		dptr = dev->qset_data = kzalloc(sizeof(struct scull_qset)
+		dptr = dev->qset_data = kzalloc(sizeof(struct _qset)
 						, GFP_KERNEL);
 		if (!dptr) {
 			pr_err("Could not allocate scull_qset1\n");
@@ -77,7 +79,7 @@ struct scull_qset *scull_follow(struct scull_dev *dev, int item)
 
 	while (item--) {
 		if (!dptr->next) {
-			dptr->next = kzalloc(sizeof(struct scull_qset)
+			dptr->next = kzalloc(sizeof(struct _qset)
 						, GFP_KERNEL);
 			if (!dptr->next)
 				return NULL;
@@ -91,7 +93,7 @@ ssize_t scull_read(struct file *filp, char __user *buf, size_t count
 			, loff_t *f_pos)
 {
 	struct scull_dev *dev = filp->private_data;
-	struct scull_qset *dptr; /* first listitem */
+	struct _qset *dptr; /* first listitem */
 	int quantum = dev->quantum;
 	int qset = dev->qset;
 	int itemsize = quantum * qset; /* how many bites in listitem*/
@@ -136,7 +138,7 @@ ssize_t scull_write(struct file *filp, const char __user *buf, size_t count
 			, loff_t *f_pos)
 {
 	struct scull_dev *dev = filp->private_data;
-	struct scull_qset *dptr;
+	struct _qset *dptr;
 	int quantum = dev->quantum;
 	int qset = dev->qset;
 	int itemsize = quantum * qset;
@@ -223,12 +225,27 @@ static const struct file_operations scull_proc_ops = {
 	.read = seq_read,
 };
 
+static long scull_ioctl(struct file *filp, unsigned int cmd
+			,unsigned long arg)
+{
+	switch(cmd) {
+	case SCULL_IOCGQUANTUM:
+		pr_info("GQUANTUM\n");
+		return put_user(scull_quantum, (unsigned long *)arg);
+	case SCULL_IOCGQSET:
+		pr_info("GQSET\n");
+		return put_user(scull_qset, (unsigned long *)arg);
+	}
+	return -1;
+}
+
 const struct file_operations scull_fops = {
 	.owner =   THIS_MODULE,
 	.read =    scull_read,
 	.write =   scull_write,
 	.open =    scull_open,
 	.release = scull_release,
+	.unlocked_ioctl = scull_ioctl,
 };
 
 static int scull_proc_init(void)
