@@ -22,7 +22,10 @@ int main()
 	}
 	printf("quantum: %d\n", quantum);
 
-	if (ioctl(fd, SCULL_IOCGQSET, &qset) == -1) {
+	// FIXME: fails when call ioctl within if statement
+	int ret = ioctl(fd, SCULL_IOCGQSET, &qset);
+	if (ret == -1) {
+	//if (ioctl(fd, SCULL_IOCGQSET, &qset) == -1) {
 		perror("ioctl qset");
 		exit(1);
 	}
