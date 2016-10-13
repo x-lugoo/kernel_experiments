@@ -327,4 +327,8 @@ static void __exit scull_exit(void)
 
 module_init(scull_init);
 module_exit(scull_exit);
+
 MODULE_LICENSE("GPL");
+MODULE_INFO(About, "Just a 'hello world' module");
+MODULE_AUTHOR("Marcos Paulo de Souza <marcos.souza.org@gmail.com>");
+MODULE_ALIAS("scull");
