@@ -38,10 +38,10 @@ struct scull_dev {
 	struct cdev cdev; /// char device struct
 };
 
-struct scull_dev *scull_dev;
+static struct scull_dev *scull_dev;
 static struct proc_dir_entry *scull_proc_dir;
 
-int scull_trim(struct scull_dev *dev)
+static int scull_trim(struct scull_dev *dev)
 {
 	struct _qset *next, *dptr;
 	int qset = dev->qset; // dev is not null
@@ -64,7 +64,7 @@ int scull_trim(struct scull_dev *dev)
 	return 0;
 }
 
-struct _qset *scull_follow(struct scull_dev *dev, int item)
+static struct _qset *scull_follow(struct scull_dev *dev, int item)
 {
 	struct _qset *dptr = dev->qset_data;
 
@@ -89,7 +89,7 @@ struct _qset *scull_follow(struct scull_dev *dev, int item)
 	return dptr;
 }
 
-ssize_t scull_read(struct file *filp, char __user *buf, size_t count
+static ssize_t scull_read(struct file *filp, char __user *buf, size_t count
 			, loff_t *f_pos)
 {
 	struct scull_dev *dev = filp->private_data;
@@ -134,7 +134,7 @@ out:
 	return retval;
 }
 
-ssize_t scull_write(struct file *filp, const char __user *buf, size_t count
+static ssize_t scull_write(struct file *filp, const char __user *buf, size_t count
 			, loff_t *f_pos)
 {
 	struct scull_dev *dev = filp->private_data;
@@ -190,12 +190,12 @@ out:
 	return retval;
 }
 
-int scull_release(struct inode *inode, struct file *filp)
+static int scull_release(struct inode *inode, struct file *filp)
 {
 	return 0;
 }
 
-int scull_open(struct inode *inode, struct file *filp)
+static int scull_open(struct inode *inode, struct file *filp)
 {
 	struct scull_dev *dev;
 
@@ -239,7 +239,7 @@ static long scull_ioctl(struct file *filp, unsigned int cmd
 	return -1;
 }
 
-const struct file_operations scull_fops = {
+static const struct file_operations scull_fops = {
 	.owner =   THIS_MODULE,
 	.read =    scull_read,
 	.write =   scull_write,
