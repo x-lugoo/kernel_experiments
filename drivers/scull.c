@@ -1,11 +1,11 @@
 #include <linux/uaccess.h>
 
-#include <linux/cdev.h>
 #include <linux/errno.h>
 #include <linux/fcntl.h>
 #include <linux/fs.h>
 #include <linux/init.h>
 #include <linux/kernel.h>
+#include <linux/miscdevice.h>
 #include <linux/module.h>
 #include <linux/proc_fs.h>
 #include <linux/semaphore.h>
@@ -15,8 +15,6 @@
 
 #include "scull.h"
 
-int scull_major;
-int scull_count = 1;
 int scull_quantum = 5;
 module_param(scull_quantum, int, S_IRUGO);
 
@@ -35,7 +33,7 @@ struct scull_dev {
 	unsigned long size; /// amount of data stored
 	unsigned int access_key; /// used by sculluid and scullpriv
 	struct semaphore sem; /// mutex semaphore
-	struct cdev cdev; /// char device struct
+	struct miscdevice misc;
 };
 
 static struct scull_dev *scull_dev;
@@ -197,20 +195,17 @@ static int scull_release(struct inode *inode, struct file *filp)
 
 static int scull_open(struct inode *inode, struct file *filp)
 {
-	struct scull_dev *dev;
-
-	dev = container_of(inode->i_cdev, struct scull_dev, cdev);
-	filp->private_data = dev;
+	filp->private_data = scull_dev;
 
 	// now trim if device if open was write only
 	if ((filp->f_flags & O_ACCMODE) == O_WRONLY)
-		scull_trim(dev); //FIXME: check errors
+		scull_trim(scull_dev); //FIXME: check errors
 	return 0;
 }
 
 static int scull_proc_show(struct seq_file *sf, void *v)
 {
-	seq_printf(sf, "%d\n", scull_major);
+	seq_printf(sf, "%d\n", 0);
 	return 0;
 }
 
@@ -272,9 +267,7 @@ static void scull_proc_exit(void)
 
 static int __init scull_init(void)
 {
-	dev_t dev;
 	int ret = -ENOMEM;
-	char devt_fmt[15];
 
 	scull_dev = kzalloc(sizeof(struct scull_dev), GFP_KERNEL);
 	if (!scull_dev)
@@ -284,33 +277,18 @@ static int __init scull_init(void)
 	scull_dev->qset = scull_qset;
 	sema_init(&scull_dev->sem, 1);
 
-	ret = alloc_chrdev_region(&dev, 0, scull_count, "scull");
-	if (ret) {
-		pr_err("Could not allocate major/minor: %d\n", ret);
+	scull_dev->misc.name = "scull0";
+	scull_dev->misc.minor = MISC_DYNAMIC_MINOR;
+	scull_dev->misc.fops = &scull_fops;
+	scull_dev->misc.mode = S_IRUGO | S_IWUGO;
+
+	if (misc_register(&scull_dev->misc) || scull_proc_init())
 		goto free_dev;
-	}
-	scull_major = MAJOR(dev);
 
-	cdev_init(&scull_dev->cdev, &scull_fops);
-	scull_dev->cdev.owner = THIS_MODULE;
-	ret = cdev_add(&scull_dev->cdev, MKDEV(scull_major, 0), scull_count);
-	if (ret) {
-		pr_notice("Error %d adding scull0\n", ret);
-		goto unregister;
-	}
-
-	if (scull_proc_init())
-		goto proc_err;
-
-	pr_info("%s load success. dev=%s, qset=%d and quantum=%d\n", __func__
-		, format_dev_t(devt_fmt, dev), scull_qset, scull_quantum);
+	pr_info("%s load success. minor=%d, qset=%d and quantum=%d\n", __func__
+		, scull_dev->misc.minor, scull_qset, scull_quantum);
 	return 0;
 
-proc_err:
-	scull_proc_exit();
-unregister:
-	cdev_del(&scull_dev->cdev);
-	unregister_chrdev_region(dev, scull_count);
 free_dev:
 	kfree(scull_dev);
 err:
@@ -319,18 +297,15 @@ err:
 
 static void __exit scull_exit(void)
 {
-	pr_info("%s called\n", __func__);
-
-	kfree(scull_dev);
-	cdev_del(&scull_dev->cdev);
-	unregister_chrdev_region(MKDEV(scull_major, 0), scull_count);
 	scull_proc_exit();
+	misc_deregister(&scull_dev->misc);
+	kfree(scull_dev);
 }
 
 module_init(scull_init);
 module_exit(scull_exit);
 
 MODULE_LICENSE("GPL");
-MODULE_INFO(About, "Just a 'hello world' module");
+MODULE_INFO(About, "Marcos' scull implementation, with some differences :)");
 MODULE_AUTHOR("Marcos Paulo de Souza <marcos.souza.org@gmail.com>");
 MODULE_ALIAS("scull");
