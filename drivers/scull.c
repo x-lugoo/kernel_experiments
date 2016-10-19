@@ -205,7 +205,7 @@ static int scull_open(struct inode *inode, struct file *filp)
 
 static int scull_proc_show(struct seq_file *sf, void *v)
 {
-	seq_printf(sf, "%d\n", 0);
+	seq_printf(sf, "%d\n", scull_dev->misc.minor);
 	return 0;
 }
 
@@ -249,7 +249,7 @@ static int scull_proc_init(void)
 	if (!scull_proc_dir)
 		return -ENOMEM;
 
-	if (!proc_create("major", 0, scull_proc_dir, &scull_proc_ops))
+	if (!proc_create("minor", 0, scull_proc_dir, &scull_proc_ops))
 		goto fail;
 
 	return 0;
@@ -261,7 +261,7 @@ fail:
 
 static void scull_proc_exit(void)
 {
-	remove_proc_entry("major", scull_proc_dir);
+	remove_proc_entry("minor", scull_proc_dir);
 	remove_proc_entry("scull", NULL);
 }
 
