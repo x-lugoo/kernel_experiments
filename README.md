@@ -14,3 +14,9 @@ Device Driver Notes
 4. Semaphores (linux/semaphore.h):
    - **down_interruptible** locks the sempahore, but available to be interrupted by signal
    - **up** unlocks the semaphore
+
+5. Misc Device (linux/miscdevice.h)
+   - Easy way to setup a simple device driver, like scull, that does nothing special
+   - **misc_register** and **misc_deregister** does all the hard work.
+   - If *probe* and *exit* functions just *register*/*deregister* a misc device, use **module_misc_device(struct miscdevice \*)**
+   instead
