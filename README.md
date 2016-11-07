@@ -1,6 +1,7 @@
+`These are just personal notes while studying Linux Device Drivers`
+
 Device Driver Notes
 ===================
-`These are just personal notes while studying Linux Device Drivers`
 
 1. When the **init function** returns < 0, insmod call **fails** and don't load the specified module
 2. If **readv**/**writev** are not specified, **read**/**write** are called multiple times
