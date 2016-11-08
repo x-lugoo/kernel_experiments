@@ -24,11 +24,12 @@ Device Driver Notes
 
 Input subsystem tests
 =====================
-   - Using evtest
-      1. To check if your touchpad or input is working, or it's a WM problem. First of all, get the event 
-      file of your device:
+
+Using evtest
+------------
+      1. To check if your touchpad or input is working, or it's a WM problem. First of all, get the event file of your device:
          - Type cat /proc/bus/input/devices
-         - Get the output and check for your desired device. In the output below we can see the input4
+      2. Get the output and check for your desired device. In the output below we can see the input4
          - I: Bus=0011 Vendor=0002 Product=000e Version=0000
          - N: Name="ETPS/2 Elantech Touchpad"
          - P: Phys=isa0060/serio1/input0
@@ -39,11 +40,9 @@ Input subsystem tests
          - B: EV=b
          - B: KEY=e420 10000 0 0 0 0
          - B: ABS=661800011000003
-
-      2. Now execute the evtest program like the following:
+      3. Now execute the evtest program like the following:
          - sudo evtest /dev/input/event4
-
-      3. From now on, after each interaction you have with the device, a log will be printed in your terminal, like:
+      4. From now on, after each interaction you have with the device, a log will be printed in your terminal, like:
          - Event: time 1478365968.419065, -------------- SYN_REPORT ------------
          - Event: time 1478365968.431823, type 3 (EV_ABS), code 58 (ABS_MT_PRESSURE), value 3
          - Event: time 1478365968.431823, type 3 (EV_ABS), code 48 (ABS_MT_TOUCH_MAJOR), value 326
