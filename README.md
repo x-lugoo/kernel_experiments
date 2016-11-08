@@ -54,3 +54,23 @@ Using evtest
          - Event: time 1478365968.444058, type 1 (EV_KEY), code 325 (BTN_TOOL_FINGER), value 0
          - Event: time 1478365968.444058, type 3 (EV_ABS), code 24 (ABS_PRESSURE), value 0
          - Event: time 1478365968.444058, -------------- SYN_REPORT ------------
+
+Using xev
+---------
+      1. xev creates a window and then asks the X server to send it events whenever anything happens to the
+      window (such as it being moved, resized, typed in, clicked in, etc.). You can  also attach it to an existing
+      window. It is useful for seeing what causes events to occur and to display the information that they contain; it
+      is essentially a debugging and development tool, and should not be needed in normal usage. (Description grabbed
+      from xev's manpage). Output example:
+         -FocusIn event, serial 36, synthetic NO, window 0x2000001,
+         -  mode NotifyWhileGrabbed, detail NotifyNonlinear
+         -KeymapNotify event, serial 36, synthetic NO, window 0x0,
+         -  keys:  0   0   4294967168 0   0   0   0   0   0   0   0   0   0   0   0   0   
+         -         0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   
+         -PropertyNotify event, serial 36, synthetic NO, window 0x2000001,
+         -   atom 0x128 (_NET_WM_STATE), time 664328400, state PropertyNewValue
+         -FocusIn event, serial 36, synthetic NO, window 0x2000001,
+         -   mode NotifyUngrab, detail NotifyNonlinear
+         -KeymapNotify event, serial 36, synthetic NO, window 0x0,
+         -   keys:  3   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   
+         -          0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   
