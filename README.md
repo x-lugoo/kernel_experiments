@@ -33,32 +33,52 @@ Device Driver Notes
 Input subsystem tests
 =====================
 
-1. To check if your touchpad or input is working, or it's a WM problem. First of all, get the event file of your device:
-   - Type cat /proc/bus/input/devices
-   - Get the output and check for your desired device. In the output below we can see the input4
-   - I: Bus=0011 Vendor=0002 Product=000e Version=0000
-   - N: Name="ETPS/2 Elantech Touchpad"
-   - P: Phys=isa0060/serio1/input0
-   - S: Sysfs=/devices/platform/i8042/serio1/input/input5
-   - U: Uniq=
-   - H: Handlers=mouse0 event4
-   - B: PROP=5
-   - B: EV=b
-   - B: KEY=e420 10000 0 0 0 0
-   - B: ABS=661800011000003
+Using evtest
+------------
+      1. To check if your touchpad or input is working, or it's a WM problem. First of all, get the event file of your device:
+         - Type cat /proc/bus/input/devices
+      2. Get the output and check for your desired device. In the output below we can see the input4
+         - I: Bus=0011 Vendor=0002 Product=000e Version=0000
+         - N: Name="ETPS/2 Elantech Touchpad"
+         - P: Phys=isa0060/serio1/input0
+         - S: Sysfs=/devices/platform/i8042/serio1/input/input5
+         - U: Uniq=
+         - H: Handlers=mouse0 event4
+         - B: PROP=5
+         - B: EV=b
+         - B: KEY=e420 10000 0 0 0 0
+         - B: ABS=661800011000003
+      3. Now execute the evtest program like the following:
+         - sudo evtest /dev/input/event4
+      4. From now on, after each interaction you have with the device, a log will be printed in your terminal, like:
+         - Event: time 1478365968.419065, -------------- SYN_REPORT ------------
+         - Event: time 1478365968.431823, type 3 (EV_ABS), code 58 (ABS_MT_PRESSURE), value 3
+         - Event: time 1478365968.431823, type 3 (EV_ABS), code 48 (ABS_MT_TOUCH_MAJOR), value 326
+         - Event: time 1478365968.431823, type 3 (EV_ABS), code 28 (ABS_TOOL_WIDTH), value 2
+         - Event: time 1478365968.431823, type 3 (EV_ABS), code 24 (ABS_PRESSURE), value 3
+         - Event: time 1478365968.431823, -------------- SYN_REPORT ------------
+         - Event: time 1478365968.444058, type 3 (EV_ABS), code 57 (ABS_MT_TRACKING_ID), value -1
+         - Event: time 1478365968.444058, type 1 (EV_KEY), code 330 (BTN_TOUCH), value 0
+         - Event: time 1478365968.444058, type 1 (EV_KEY), code 325 (BTN_TOOL_FINGER), value 0
+         - Event: time 1478365968.444058, type 3 (EV_ABS), code 24 (ABS_PRESSURE), value 0
+         - Event: time 1478365968.444058, -------------- SYN_REPORT ------------
 
-2. Now execute the evtest program like the following:
-   - sudo evtest /dev/input/event4
-
-3. From now on, after each interaction you have with the device, a log will be printed in your terminal, like:
-   - Event: time 1478365968.419065, -------------- SYN_REPORT ------------
-   - Event: time 1478365968.431823, type 3 (EV_ABS), code 58 (ABS_MT_PRESSURE), value 3
-   - Event: time 1478365968.431823, type 3 (EV_ABS), code 48 (ABS_MT_TOUCH_MAJOR), value 326
-   - Event: time 1478365968.431823, type 3 (EV_ABS), code 28 (ABS_TOOL_WIDTH), value 2
-   - Event: time 1478365968.431823, type 3 (EV_ABS), code 24 (ABS_PRESSURE), value 3
-   - Event: time 1478365968.431823, -------------- SYN_REPORT ------------
-   - Event: time 1478365968.444058, type 3 (EV_ABS), code 57 (ABS_MT_TRACKING_ID), value -1
-   - Event: time 1478365968.444058, type 1 (EV_KEY), code 330 (BTN_TOUCH), value 0
-   - Event: time 1478365968.444058, type 1 (EV_KEY), code 325 (BTN_TOOL_FINGER), value 0
-   - Event: time 1478365968.444058, type 3 (EV_ABS), code 24 (ABS_PRESSURE), value 0
-   - Event: time 1478365968.444058, -------------- SYN_REPORT ------------
+Using xev
+---------
+      1. xev creates a window and then asks the X server to send it events whenever anything happens to the
+      window (such as it being moved, resized, typed in, clicked in, etc.). You can  also attach it to an existing
+      window. It is useful for seeing what causes events to occur and to display the information that they contain; it
+      is essentially a debugging and development tool, and should not be needed in normal usage. (Description grabbed
+      from xev's manpage). Output example:
+         -FocusIn event, serial 36, synthetic NO, window 0x2000001,
+         -  mode NotifyWhileGrabbed, detail NotifyNonlinear
+         -KeymapNotify event, serial 36, synthetic NO, window 0x0,
+         -  keys:  0   0   4294967168 0   0   0   0   0   0   0   0   0   0   0   0   0   
+         -         0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   
+         -PropertyNotify event, serial 36, synthetic NO, window 0x2000001,
+         -   atom 0x128 (_NET_WM_STATE), time 664328400, state PropertyNewValue
+         -FocusIn event, serial 36, synthetic NO, window 0x2000001,
+         -   mode NotifyUngrab, detail NotifyNonlinear
+         -KeymapNotify event, serial 36, synthetic NO, window 0x0,
+         -   keys:  3   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   
+         -          0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   
