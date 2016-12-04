@@ -22,6 +22,14 @@ Device Driver Notes
    - If *probe* and *exit* functions just *register*/*deregister* a misc device, use **module_misc_device(struct miscdevice \*)**
    instead
 
+6. Create Device (linux/device.h)
+   - This registers a device, and tell userspace (aka udev or systemd) to create a file under /dev dir.
+   - **device_create** and **device_destroy**, does this job. To call **device_create**, you need to pass a class pointer, like below:
+   -	dev_t dev = MKDEV(Major,0);
+   -	struct class *c = class_create(THIS_MODULE, "name_of_file_in_dev_dir_to_be_created");
+   -	struct device *d = device_create(c, NULL /* parent */, dev, NULL /* no additional data */, "same name as before");
+   -	device_destroy(c, MKDEV(Major, 0));
+
 Input subsystem tests
 =====================
 
