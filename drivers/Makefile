@@ -1,4 +1,5 @@
 obj-m += scull.o
+obj-m += simple_module.o
 
 SRC=/lib/modules/$(shell uname -r)/build
 
