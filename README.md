@@ -7,10 +7,12 @@ Device Driver Notes
 2. If **readv**/**writev** are not specified, **read**/**write** are called multiple times
    - When **read**/**write** returns a positive number, it checks if the number is smaller to the *count* parameter, if yes, then **read**/**write** will be called again, but this time will have a new value (older count - the returned value from last read/write call), and this will repeat until count reaches zero
 3. To manipulate *proc* directories (linux/proc_fs.h):
-   - struct proc_dir_entry *proc_mkdir(char *dirname, struct proc_dir_entry *parent);
-   - struct proc_dir_entry *proc_create(const char *name, umode_t mode, struct proc_dir_entry *parent,
+   ```C
+   struct proc_dir_entry *proc_mkdir(char *dirname, struct proc_dir_entry *parent);
+   struct proc_dir_entry *proc_create(const char *name, umode_t mode, struct proc_dir_entry *parent,
                                           const struct file_operations *proc_fops);
-   - void remove_proc_entry(const char *, struct proc_dir_entry *);
+   void remove_proc_entry(const char *, struct proc_dir_entry *);
+   ```
    
 4. Semaphores (linux/semaphore.h):
    - **down_interruptible** locks the sempahore, but available to be interrupted by signal
@@ -25,11 +27,13 @@ Device Driver Notes
 6. Create Device (linux/device.h)
    - This registers a device, and tell userspace (aka udev or systemd) to create a file under /dev dir.
    - **device_create** and **device_destroy**, does this job. To call **device_create**, you need to pass a class pointer, like below:
-   -	dev_t dev = MKDEV(Major,0);
-   -	struct class \*c = class_create(THIS_MODULE, "name_of_file_in_dev_dir_to_be_created");
-   - 	class_destroy(c);
-   -	struct device \*d = device_create(c, NULL /* parent */, dev, NULL /* no additional data */, "same name as before");
-   -	device_destroy(c, dev);
+   ```C
+   dev_t dev = MKDEV(Major,0);
+   struct class \*c = class_create(THIS_MODULE, "name_of_file_in_dev_dir_to_be_created");
+   class_destroy(c);
+   struct device \*d = device_create(c, NULL /* parent */, dev, NULL /* no additional data */, "same name as before");
+   device_destroy(c, dev);
+   ```
 
 7. Simple read from user (linux/fs.h)
    - To handle simple user readers from userspace, you can use the functions **simple_read_from_buffer**. This functions already takes care of all possible errors while reading, like invalid position and **copy_to_user** errors also.
