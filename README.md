@@ -31,6 +31,13 @@ Device Driver Notes
    -	struct device \*d = device_create(c, NULL /* parent */, dev, NULL /* no additional data */, "same name as before");
    -	device_destroy(c, dev);
 
+7. Simple read from user (linux/fs.h)
+   - To handle simple user readers from userspace, you can use the functions **simple_read_from_buffer**. This functions already takes care of all possible errors while reading, like invalid position and **copy_to_user** errors also.
+   ```C
+   ssize_t simple_read_from_buffer(void __user *to, size_t count, loff_t *ppos,
+                                   const void *from, size_t available)
+   ```
+
 Input subsystem tests
 =====================
 
