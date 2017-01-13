@@ -1,7 +1,12 @@
 `These are just personal notes while studying Linux Device Drivers`
 
-Device Driver Notes
-===================
+Problem solving
+===============
+
+1. When you try to load a module and it shows some *Unkonwn symbols*, like *Unknown symbol debugfs_remove_recursive*, you need to add a license in your module, like **MODULE_LICENSE("GPL")**.
+
+Device Driver Notes and Useful Functions
+========================================
 
 1. When the **init function** returns < 0, insmod call **fails** and don't load the specified module
 2. If **readv**/**writev** are not specified, **read**/**write** are called multiple times
@@ -29,9 +34,9 @@ Device Driver Notes
    - **device_create** and **device_destroy**, does this job. To call **device_create**, you need to pass a class pointer, like below:
    ```C
    dev_t dev = MKDEV(Major,0);
-   struct class \*c = class_create(THIS_MODULE, "name_of_file_in_dev_dir_to_be_created");
+   struct class *c = class_create(THIS_MODULE, "name_of_file_in_dev_dir_to_be_created");
    class_destroy(c);
-   struct device \*d = device_create(c, NULL /* parent */, dev, NULL /* no additional data */, "same name as before");
+   struct device *d = device_create(c, NULL /* parent */, dev, NULL /* no additional data */, "same name as before");
    device_destroy(c, dev);
    ```
 
