@@ -49,6 +49,18 @@ Device Driver Notes and Useful Functions
    				, const void __user *from, size_t count);
    ```
 
+8. Debugfs creation routines (linux/debugfs.h):
+   ```C
+   /* to create a new directory under debugfs */
+   struct dentry *debugfs_create_dir(const char *name, struct dentry *parent);
+   /* to create a new file in debugfs */
+   struct dentry *debufs_create_file(const char *name, umode_t mode, struct dentry *parent
+   				, void *data /* is passed in every call */
+				, const struct file_operations *fops);
+   /* to remove all debugfs files below a dir */
+   void debugfs_remove_recursive(struct dentry *dentry);
+   ```
+
 Input subsystem tests
 =====================
 
