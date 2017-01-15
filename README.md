@@ -19,9 +19,15 @@ Device Driver Notes and Useful Functions
    void remove_proc_entry(const char *, struct proc_dir_entry *);
    ```
    
-4. Semaphores (linux/semaphore.h):
-   - **down_interruptible** locks the sempahore, but available to be interrupted by signal
-   - **up** unlocks the semaphore
+4. Semaphores and mutexes (linux/semaphore.h, linux/mutex.h):
+   ```C
+   /* to lock/unlock an semaphore */
+   int down_interruptible(struct semaphore *sem); /* locks but available to be interrupted by signal */
+   void up(struct semaphore *sem); /* unlocks the up */
+   /* to lock/unlock mutexes */
+   mutex_lock(struct mutex *m);
+   mutex_unlock(struct mutex *m);
+   ```
 
 5. Misc Device (linux/miscdevice.h)
    - Easy way to setup a simple device driver, like scull, that does nothing special
