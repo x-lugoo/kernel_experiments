@@ -40,11 +40,13 @@ Device Driver Notes and Useful Functions
    device_destroy(c, dev);
    ```
 
-7. Simple read from user (linux/fs.h)
-   - To handle simple user readers from userspace, you can use the functions **simple_read_from_buffer**. This functions already takes care of all possible errors while reading, like invalid position and **copy_to_user** errors also.
+7. Simple write/read from user (linux/fs.h)
+   - To handle simple user readers or writes from userspace, you can use the functions **simple_{read,write}_from_buffer**. These functions already takes care of all possible errors while reading/writing, like invalid position and **copy_{from,to}_user** errors.
    ```C
-   ssize_t simple_read_from_buffer(void __user *to, size_t count, loff_t *ppos,
-                                   const void *from, size_t available)
+   ssize_t simple_read_from_buffer(void __user *to, size_t count, loff_t *ppos
+				, const void *from, size_t available);
+   ssize_t simple_write_to_buffer(void *to, size_t available, loff_t *ppos
+   				, const void __user *from, size_t count);
    ```
 
 Input subsystem tests
