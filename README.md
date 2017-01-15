@@ -61,6 +61,16 @@ Device Driver Notes and Useful Functions
    void debugfs_remove_recursive(struct dentry *dentry);
    ```
 
+9. Credential manipulations routines (linux/cred.h, linux/uidgid.h):
+   ```C
+   /* to get the current effective user (uid) */
+   current_uid();
+   /* get the current cred structure */
+   current_cred();
+   /* compare the UIDs */
+   bool uid_eq();
+   ```
+
 Input subsystem tests
 =====================
 
