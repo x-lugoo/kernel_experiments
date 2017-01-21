@@ -75,6 +75,8 @@ Device Driver Notes and Useful Functions
    current_cred();
    /* compare the UIDs */
    bool uid_eq();
+   /* definition of root user */
+   GLOBAL_ROOT_UID
    ```
 
 Input subsystem tests
