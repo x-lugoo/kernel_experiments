@@ -5,6 +5,8 @@ Problem solving
 
 1. When you try to load a module and it shows some *Unkonwn symbols*, like *Unknown symbol debugfs_remove_recursive*, you need to add a license in your module, like **MODULE_LICENSE("GPL")**.
 
+2. When starting kernel build process with KBUILD_VERBOSE set as 1, it shows the exactly gcc command to compile each file, useful for debugging.
+
 Device Driver Notes and Useful Functions
 ========================================
 
