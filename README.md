@@ -80,6 +80,28 @@ Device Driver Notes and Useful Functions
    /* definition of root user */
    GLOBAL_ROOT_UID
    ```
+10. Sysfs manipulation (linux/sysfs.h, linux/kobject.h)
+   ```C
+   /* create root sysfs dir to your aplication */
+   struct kobject *kobj = kobject_create_and_add("directory_name", parent_kobj);
+
+   /* create file within this directory and add methods to access it */
+   char *foo;
+   size_t foo_show(struct kobject *kobj, struct kobj_attribute *attr
+			, char *buf) { ... }
+   size_t foo_store(struct kobject *kobj, struct kobj_attribute *attr
+			, char *buf, size_t count) { ... }
+
+   /* implies S_IRUSR | S_IWUSR, foo_show and foo_store
+   struct kobj_attribute foo_attr = __ATTR(foo);
+
+   struct attribute *attrs[] = { &foo_attr.attr, NULL, };
+
+   struct attribute_group attr_group = { .attrs = attrs; };
+
+   /* to add more files, create more #_show, #_store, and new #_attrs
+   struct kobject *child = sysfs_create_group(kobj, &attr_group);
+   ```
 
 Input subsystem tests
 =====================
