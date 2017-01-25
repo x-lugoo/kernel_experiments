@@ -105,9 +105,9 @@ Device Driver Notes and Useful Functions
 11. ACPI object descriptions
 ```sh
 OSPM	Operating Systems-directed configuration and Power Management
-_HID	supply OSPM with a device's Plug and Play Hardware ID
-_CID	supply OSPM with a device's Plug and Play Device ID
-_UID	Unique ID who doesn't change across reboots. This should be different from _HIDs and _CIDs.
+_HID	Plug and Play Hardware ID
+_CID	Plug and Play Device ID
+_UID	Unique ID who doesn\'t change across reboots. This should be different from _HIDs and _CIDs.
 _CLS	Class Code, PCI-defined class, subclass or programming interface of a device.
 ```
 
