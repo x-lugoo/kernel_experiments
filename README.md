@@ -102,6 +102,22 @@ Device Driver Notes and Useful Functions
    /* to add more files, create more #_show, #_store, and new #_attrs
    struct kobject *child = sysfs_create_group(kobj, &attr_group);
    ```
+11. ACPI object descriptions
+OSPM	Operating Systems-directed configuration and Power Management
+\_HID	supply OSPM with a device's Plug and Play Hardware ID
+\_CID	supply OSPM with a device's Plug and Play Device ID
+\_UID	Unique ID who doesn't change across reboots. This should be different from \_HIDs and \_CIDs.
+\_CLS	Class Code, PCI-defined class, subclass or programming interface of a device.
+
+12. Debug ACPI methods
+Extract your ACPI data, extract the ACPI tables, decompile it and run the acpiexec:
+sudo acpidump >acpi.dat
+acpixtract acpi.dat
+iasl \*.dat; rm acpi.dat
+acpiexec -vi -b "methods" \*.dsl # this will prompt all methods available
+acpiexec -vi \*.dsl # this command alone will load all dsl files and prompt you a command to be issued
+\# type execute to call an ACPI method from the dsl files:
+execute \_SB.PCI0.LPCB.PS2M._HID
 
 Input subsystem tests
 =====================
