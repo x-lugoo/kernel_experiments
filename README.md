@@ -13,7 +13,9 @@ Device Driver Notes and Useful Functions
 1. When the **init function** returns < 0, insmod call **fails** and don't load the specified module
 2. If **readv**/**writev** are not specified, **read**/**write** are called multiple times
    - When **read**/**write** returns a positive number, it checks if the number is smaller to the *count* parameter, if yes, then **read**/**write** will be called again, but this time will have a new value (older count - the returned value from last read/write call), and this will repeat until count reaches zero
-3. To manipulate *proc* directories (linux/proc_fs.h):
+   
+Manipulate *proc* directories (linux/proc_fs.h)
+-----------------------------------------------
    ```C
    struct proc_dir_entry *proc_mkdir(char *dirname, struct proc_dir_entry *parent);
    struct proc_dir_entry *proc_create(const char *name, umode_t mode, struct proc_dir_entry *parent,
@@ -21,7 +23,8 @@ Device Driver Notes and Useful Functions
    void remove_proc_entry(const char *, struct proc_dir_entry *);
    ```
    
-4. Semaphores and mutexes (linux/semaphore.h, linux/mutex.h):
+Semaphores and mutexes (linux/semaphore.h, linux/mutex.h)
+----------------------------------------------------------
    ```C
    /* to lock/unlock an semaphore */
    int down_interruptible(struct semaphore *sem); /* locks but available to be interrupted by signal */
@@ -31,13 +34,15 @@ Device Driver Notes and Useful Functions
    mutex_unlock(struct mutex *m);
    ```
 
-5. Misc Device (linux/miscdevice.h)
+Misc Device (linux/miscdevice.h)
+-----------------------------------
    - Easy way to setup a simple device driver, like scull, that does nothing special
    - **misc_register** and **misc_deregister** does all the hard work.
    - If *probe* and *exit* functions just *register*/*deregister* a misc device, use **module_misc_device(struct miscdevice \*)**
    instead
 
-6. Create Device (linux/device.h)
+Create Device (linux/device.h)
+------------------------------
    - This registers a device, and tell userspace (aka udev or systemd) to create a file under /dev dir.
    - **device_create** and **device_destroy**, does this job. To call **device_create**, you need to pass a class pointer, like below:
    ```C
@@ -48,7 +53,8 @@ Device Driver Notes and Useful Functions
    device_destroy(c, dev);
    ```
 
-7. Simple write/read from user (linux/fs.h)
+Simple write/read from user (linux/fs.h)
+----------------------------------------
    - To handle simple user readers or writes from userspace, you can use the functions **simple_{read,write}_from_buffer**. These functions already takes care of all possible errors while reading/writing, like invalid position and **copy_{from,to}_user** errors.
    ```C
    ssize_t simple_read_from_buffer(void __user *to, size_t count, loff_t *ppos
@@ -57,7 +63,8 @@ Device Driver Notes and Useful Functions
    				, const void __user *from, size_t count);
    ```
 
-8. Debugfs creation routines (linux/debugfs.h):
+Debugfs creation routines (linux/debugfs.h)
+-------------------------------------------
    ```C
    /* to create a new directory under debugfs */
    struct dentry *debugfs_create_dir(const char *name, struct dentry *parent);
@@ -69,7 +76,8 @@ Device Driver Notes and Useful Functions
    void debugfs_remove_recursive(struct dentry *dentry);
    ```
 
-9. Credential manipulations routines (linux/cred.h, linux/uidgid.h):
+Credential manipulations routines (linux/cred.h, linux/uidgid.h)
+----------------------------------------------------------------
    ```C
    /* to get the current effective user (uid) */
    current_uid();
@@ -80,7 +88,8 @@ Device Driver Notes and Useful Functions
    /* definition of root user */
    GLOBAL_ROOT_UID
    ```
-10. Sysfs manipulation (linux/sysfs.h, linux/kobject.h)
+Sysfs manipulation (linux/sysfs.h, linux/kobject.h)
+---------------------------------------------------
    ```C
    /* create root sysfs dir to your aplication */
    struct kobject *kobj = kobject_create_and_add("directory_name", parent_kobj);
@@ -102,7 +111,8 @@ Device Driver Notes and Useful Functions
    /* to add more files, create more #_show, #_store, and new #_attrs */
    struct kobject \*child = sysfs_create_group(kobj, &attr_group);
    ```
-11. ACPI object descriptions
+ACPI object descriptions
+------------------------
 ```sh
 OSPM	Operating Systems-directed configuration and Power Management
 _HID	Plug and Play Hardware ID
@@ -111,7 +121,8 @@ _UID	Unique ID who doesn\'t change across reboots. This should be different from
 _CLS	Class Code, PCI-defined class, subclass or programming interface of a device.
 ```
 
-12. Debug ACPI methods
+Debug ACPI methods
+------------------
 ```sh
 Extract your ACPI data, extract the ACPI tables, decompile it and run the acpiexec:
 sudo acpidump >acpi.dat
