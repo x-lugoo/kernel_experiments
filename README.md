@@ -92,32 +92,40 @@ Device Driver Notes and Useful Functions
    size_t foo_store(struct kobject *kobj, struct kobj_attribute *attr
 			, char *buf, size_t count) { ... }
 
-   /* implies S_IRUSR | S_IWUSR, foo_show and foo_store
+   /* implies S_IRUSR | S_IWUSR, foo_show and foo_store */
    struct kobj_attribute foo_attr = __ATTR(foo);
 
    struct attribute *attrs[] = { &foo_attr.attr, NULL, };
 
    struct attribute_group attr_group = { .attrs = attrs; };
 
-   /* to add more files, create more #_show, #_store, and new #_attrs
-   struct kobject *child = sysfs_create_group(kobj, &attr_group);
+   /* to add more files, create more #_show, #_store, and new #_attrs */
+   struct kobject \*child = sysfs_create_group(kobj, &attr_group);
    ```
 11. ACPI object descriptions
+```sh
 OSPM	Operating Systems-directed configuration and Power Management
-\_HID	supply OSPM with a device's Plug and Play Hardware ID
-\_CID	supply OSPM with a device's Plug and Play Device ID
-\_UID	Unique ID who doesn't change across reboots. This should be different from \_HIDs and \_CIDs.
-\_CLS	Class Code, PCI-defined class, subclass or programming interface of a device.
+_HID	supply OSPM with a device's Plug and Play Hardware ID
+_CID	supply OSPM with a device's Plug and Play Device ID
+_UID	Unique ID who doesn't change across reboots. This should be different from _HIDs and _CIDs.
+_CLS	Class Code, PCI-defined class, subclass or programming interface of a device.
+```
 
 12. Debug ACPI methods
+```sh
 Extract your ACPI data, extract the ACPI tables, decompile it and run the acpiexec:
 sudo acpidump >acpi.dat
 acpixtract acpi.dat
-iasl \*.dat; rm acpi.dat
-acpiexec -vi -b "methods" \*.dsl # this will prompt all methods available
-acpiexec -vi \*.dsl # this command alone will load all dsl files and prompt you a command to be issued
-\# type execute to call an ACPI method from the dsl files:
-execute \_SB.PCI0.LPCB.PS2M._HID
+iasl *.dat; rm acpi.dat
+acpiexec -vi -b "methods" *.dsl # this will prompt all methods available
+acpiexec -vi *.dsl # this command alone will load all dsl files and prompt you a command to be issued
+
+# type execute to call an ACPI method from the dsl files:
+- execute \_SB.PCI0.LPCB.PS2M._HID
+Evaluating \_SB.PCI0.LPCB.PS2M._HID
+Evaluation of \_SB.PCI0.LPCB.PS2M._HID returned object 0x55bd05ec2a60, external buffer length 18
+  [Integer] = 00000000060A2E4F
+```
 
 Input subsystem tests
 =====================
