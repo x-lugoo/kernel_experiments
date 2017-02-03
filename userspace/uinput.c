@@ -61,7 +61,7 @@ int main()
 		exit(1);
 	}
 
-	// FIXME: Really necessary?
+	// necessary, waits to entire system to discover the new input device and handle events
 	sleep(1);
 
 	emit(EV_KEY, KEY_SPACE, 1);
