@@ -39,5 +39,5 @@ int main()
 	libevdev_uinput_destroy(uidev);
 	close(fd);
 
-	exit(0);
+	return 0;
 }
