@@ -6,4 +6,4 @@ all:
 	$(CC) uinput.c $(CFLAGS) -o uinput
 	$(CC) evdev.c $(CFLAGS) -o evdev -I/usr/include/libevdev-1.0/ -levdev
 clean:
-	rm -rf scull_user
+	rm -rf scull_user uinput evdev
