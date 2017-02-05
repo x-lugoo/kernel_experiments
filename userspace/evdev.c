@@ -32,6 +32,7 @@ int main()
 	libevdev_free(dev);
 
 	libevdev_uinput_write_event(uidev, EV_KEY, KEY_SPACE, 1);
+	libevdev_uinput_write_event(uidev, EV_SYN, SYN_REPORT, 0);
 	libevdev_uinput_write_event(uidev, EV_KEY, KEY_SPACE, 0);
 	libevdev_uinput_write_event(uidev, EV_SYN, SYN_REPORT, 0);
 
