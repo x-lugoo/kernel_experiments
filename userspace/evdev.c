@@ -31,6 +31,9 @@ int main()
 	/* not necessary anymore */
 	libevdev_free(dev);
 
+	/* necesary, waits for the Screen Server to handle the incoming events */
+	sleep(1);
+
 	libevdev_uinput_write_event(uidev, EV_KEY, KEY_SPACE, 1);
 	libevdev_uinput_write_event(uidev, EV_SYN, SYN_REPORT, 0);
 	libevdev_uinput_write_event(uidev, EV_KEY, KEY_SPACE, 0);
