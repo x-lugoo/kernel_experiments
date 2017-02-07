@@ -1,5 +1,10 @@
 `These are just personal notes while studying Linux Device Drivers`
 
+Building Tips
+=============
+
+1. To build only one module, you can type **make path/the/the/module.ko**, and if you want to build all modules of a path, just execute **make path/to/dir**.
+
 Problem solving
 ===============
 
