@@ -65,6 +65,7 @@ int main()
 	sleep(1);
 
 	emit(EV_KEY, KEY_SPACE, 1);
+	emit(EV_SYN, SYN_REPORT, 0);
 	emit(EV_KEY, KEY_SPACE, 0);
 	emit(EV_SYN, SYN_REPORT, 0);
 
