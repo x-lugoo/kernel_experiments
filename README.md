@@ -43,20 +43,24 @@ Misc Device (linux/miscdevice.h)
 
 Create Device (linux/device.h)
 ------------------------------
-   - This registers a device, and tell userspace (aka udev or systemd) to create a file under /dev dir.
-   - **device_create** and **device_destroy**, does this job. To call **device_create**, you need to pass a class pointer, like below:
    ```C
    dev_t dev = MKDEV(Major,0);
+   /* This registers a device, and tell userspace (aka udev or systemd) to create a file under /dev dir */
    struct class *c = class_create(THIS_MODULE, "name_of_file_in_dev_dir_to_be_created");
    class_destroy(c);
+   /* device_create and device_destroy is where the devices are created and removed */
    struct device *d = device_create(c, NULL /* parent */, dev, NULL /* no additional data */, "same name as before");
    device_destroy(c, dev);
    ```
 
 Simple write/read from user (linux/fs.h)
 ----------------------------------------
-   - To handle simple user readers or writes from userspace, you can use the functions **simple_{read,write}_from_buffer**. These functions already takes care of all possible errors while reading/writing, like invalid position and **copy_{from,to}_user** errors.
    ```C
+   /*
+   To handle simple user readers or writes from userspace, you can use the functions
+   simple_{read,write}_from_buffer. These functions already takes care of all possible
+   errors while reading/writing, like invalid position and copy_{from,to}_user errors.
+   */
    ssize_t simple_read_from_buffer(void __user *to, size_t count, loff_t *ppos
 				, const void *from, size_t available);
    ssize_t simple_write_to_buffer(void *to, size_t available, loff_t *ppos
