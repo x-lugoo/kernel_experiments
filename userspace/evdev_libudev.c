@@ -86,6 +86,8 @@ int main()
 		return 1;
 	}
 
+	libevdev_free(uev);
+
 	do {
 		struct input_event iev;
 		rc = libevdev_next_event(ev, LIBEVDEV_READ_FLAG_NORMAL, &iev);
@@ -108,6 +110,10 @@ int main()
 			libevdev_uinput_write_event(uinput_ev, EV_SYN, SYN_REPORT, 0);
 		}
 	} while (rc == 0 || rc == 1 || rc == -EAGAIN);
+
+	libevdev_uinput_destroy(uinput_ev);
+	close(fd);
+	close(ufd);
 
 	udev_enumerate_unref(enumerate);
 	udev_unref(udev);
