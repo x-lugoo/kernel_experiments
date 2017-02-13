@@ -18,7 +18,7 @@ int main()
 
 	struct libevdev *ev= NULL, *uev = NULL;
 	struct libevdev_uinput *uinput_ev = NULL;
-	int fd, rc = 1, ufd;
+	int fd, rc = 1, ufd, joyfound = 0;
 
 	udev = udev_new();
 	if (!udev) {
@@ -51,6 +51,11 @@ int main()
 		if (!m)
 			continue;
 
+		if (strncmp(m, "Dragon", 6))
+			continue;
+
+		// found a dragonrise controller, stop
+		joyfound = 1;
 		printf("Dev node path: %s\n", node);
 		printf("Vendor ID/Product ID: %s/%s\n"
 			, udev_device_get_sysattr_value(dev, "idVendor")
@@ -58,9 +63,12 @@ int main()
 		printf("Manufacturer/Product: %s/%s\n"
 			, m
 			, udev_device_get_sysattr_value(dev, "product"));
-		// found a dragonrise controller, stop
-		if (!strncmp(m, "Dragon", 6))
-			break;
+		break;
+	}
+
+	if (!joyfound) {
+		fprintf(stderr, "Dragonrise not found\n");
+		return 1;
 	}
 
 	fd = open(node, O_RDONLY | O_NONBLOCK);
@@ -83,6 +91,8 @@ int main()
 
 	if (libevdev_uinput_create_from_device(uev, ufd, &uinput_ev)) {
 		fprintf(stderr, "uinput could not be created\n");
+		udev_enumerate_unref(enumerate);
+		udev_unref(udev);
 		return 1;
 	}
 
