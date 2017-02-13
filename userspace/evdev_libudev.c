@@ -41,7 +41,8 @@ int main()
 		if (!node)
 			continue;
 
-		// TODO: filter by event device
+		// TODO: find a way to find a joypad device and it's event
+		// handler
 		dev = udev_device_get_parent_with_subsystem_devtype(dev
 						, "usb", "usb_device");
 		if (!dev)
