@@ -20,7 +20,6 @@ int main()
 
 	dev = libevdev_new();
 	libevdev_set_name(dev, "my_evdev_device");
-	libevdev_enable_event_type(dev, EV_KEY);
 	libevdev_enable_event_code(dev, EV_KEY, KEY_SPACE, NULL);
 
 	if (libevdev_uinput_create_from_device(dev, fd, &uidev) < 0) {
