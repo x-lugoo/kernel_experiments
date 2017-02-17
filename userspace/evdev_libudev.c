@@ -57,13 +57,6 @@ int main()
 
 		// found a dragonrise controller, stop
 		joyfound = 1;
-		printf("Dev node path: %s\n", node);
-		printf("Vendor ID/Product ID: %s/%s\n"
-			, udev_device_get_sysattr_value(dev, "idVendor")
-			, udev_device_get_sysattr_value(dev, "idProduct"));
-		printf("Manufacturer/Product: %s/%s\n"
-			, m
-			, udev_device_get_sysattr_value(dev, "product"));
 		break;
 	}
 
@@ -78,6 +71,11 @@ int main()
 		fprintf(stderr, "failed to init evdev: %s\n", strerror(-rc));
 		return 1;
 	}
+
+	printf("Dev node path: %s\n", node);
+	printf("Vendor ID/Product ID: %x/%x\n", libevdev_get_id_vendor(ev)
+						, libevdev_get_id_product(ev));
+	printf("Manufacturer/Product: %s\n", libevdev_get_name(ev));
 
 	ufd = open("/dev/uinput", O_RDWR);
 	if (fd == -1) {
