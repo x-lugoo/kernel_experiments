@@ -11,7 +11,6 @@
 #include <linux/uinput.h>
 
 static int fd;
-static struct input_id uid;
 static struct uinput_setup usetup;
 
 void emit(int type, int code, int val)
@@ -28,8 +27,16 @@ void emit(int type, int code, int val)
 	}
 }
 
+void send_event(int type, int code, int val)
+{
+	emit(type, code, val);
+	emit(EV_SYN, SYN_REPORT, 0);
+}
+
 int main()
 {
+	struct input_id uid;
+
 	fd = open("/dev/uinput", O_WRONLY | O_NONBLOCK);
 	if (fd < 0) {
 		perror("open");
@@ -64,10 +71,8 @@ int main()
 	// necessary, waits to entire system to discover the new input device and handle events
 	sleep(1);
 
-	emit(EV_KEY, KEY_SPACE, 1);
-	emit(EV_SYN, SYN_REPORT, 0);
-	emit(EV_KEY, KEY_SPACE, 0);
-	emit(EV_SYN, SYN_REPORT, 0);
+	send_event(EV_KEY, KEY_SPACE, 1);
+	send_event(EV_KEY, KEY_SPACE, 0);
 
 	if (ioctl(fd, UI_DEV_DESTROY) == -1) {
 		perror("ioctl dev destroy");
