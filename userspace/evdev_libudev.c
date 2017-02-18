@@ -8,6 +8,8 @@
 #include <unistd.h>
 #include <errno.h>
 
+/* udev docs: https://www.freedesktop.org/software/systemd/man/#U */
+
 int main()
 {
 	struct udev *udev;
@@ -27,48 +29,46 @@ int main()
 	}
 
 	enumerate = udev_enumerate_new(udev);
-	udev_enumerate_add_match_subsystem(enumerate, "input");
+	udev_enumerate_add_match_property(enumerate, "ID_INPUT_JOYSTICK", "1");
 	udev_enumerate_scan_devices(enumerate);
 	devices = udev_enumerate_get_list_entry(enumerate);
 
 	udev_list_entry_foreach(dev_list_entry, devices) {
-		const char *path;
-
-		path = udev_list_entry_get_name(dev_list_entry);
+		const char *path = udev_list_entry_get_name(dev_list_entry);
 		dev = udev_device_new_from_syspath(udev, path);
 
+		/* when dealing with a joystick device, the final device will be
+		 * an event and/or a joystick, so node will be empty
+		 */
 		node = udev_device_get_devnode(dev);
 		if (!node)
 			continue;
 
-		// TODO: find a way to find a joypad device and it's event
-		// handler
+		/* our filter is to find a joystick who is controlled by USB */
 		dev = udev_device_get_parent_with_subsystem_devtype(dev
 						, "usb", "usb_device");
 		if (!dev)
 			continue;
 
-		const char *m = udev_device_get_sysattr_value(dev, "manufacturer");
-		if (!m)
-			continue;
-
-		if (strncmp(m, "Dragon", 6))
-			continue;
-
-		// found a dragonrise controller, stop
-		joyfound = 1;
-		break;
+		/* one joystick gets the following scheme on udev:
+		 * inputX
+		 * 	eventX (dev/input/eventX)
+		 * 	jsX (/dev/input/jsX)
+		 * For more info, see udev-browse
+		 *
+		 * As we are using evdev here, the code above will fail
+		 * with inputX, and jsX, letting just eventX to control the
+		 * device.
+		 */
+		fd = open(node, O_RDONLY | O_NONBLOCK);
+		if (libevdev_new_from_fd(fd, &ev) == 0) {
+			joyfound = 1;
+			break;
+		}
 	}
 
 	if (!joyfound) {
-		fprintf(stderr, "Dragonrise not found\n");
-		return 1;
-	}
-
-	fd = open(node, O_RDONLY | O_NONBLOCK);
-	rc = libevdev_new_from_fd(fd, &ev);
-	if (rc < 0) {
-		fprintf(stderr, "failed to init evdev: %s\n", strerror(-rc));
+		fprintf(stderr, "Joystick not found, aborting.\n");
 		return 1;
 	}
 
