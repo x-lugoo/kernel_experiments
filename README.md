@@ -147,6 +147,15 @@ Evaluation of \_SB.PCI0.LPCB.PS2M._HID returned object 0x55bd05ec2a60, external 
   [Integer] = 00000000060A2E4F
 ```
 
+Udev tests and API
+==================
+
+udev is the device manager of Linux, it mainly manages device nodes in /dev. libudev can be used to query and get information
+about devices present on your systems.
+
+libudev docs: https://www.freedesktop.org/software/systemd/man/#U
+udevadm and udev-browse apps can be used to query this information without using libudev, for testing purposes.
+
 Input subsystem tests
 =====================
 
