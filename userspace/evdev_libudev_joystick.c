@@ -44,17 +44,18 @@ int main()
 		if (!node)
 			continue;
 
-		/* our filter is to find a joystick who is controlled by USB */
+		/* our filter is set to find a joystick who is controlled
+		 * by USB bus only */
 		dev = udev_device_get_parent_with_subsystem_devtype(dev
 						, "usb", "usb_device");
 		if (!dev)
 			continue;
 
 		/* one joystick gets the following scheme on udev:
-		 * inputX
-		 * 	eventX (dev/input/eventX)
-		 * 	jsX (/dev/input/jsX)
-		 * For more info, see udev-browse
+		 * inputX	(doesn't have an entry on /dev)
+		 * 	eventX	(dev/input/eventX)
+		 * 	jsX	(/dev/input/jsX)
+		 * For more info, see udev-browse application
 		 *
 		 * As we are using evdev here, the code above will fail
 		 * with inputX, and jsX, letting just eventX to control the
