@@ -53,6 +53,16 @@ int main()
 		exit(1);
 	}
 
+	if (ioctl(fd, UI_SET_EVBIT, EV_REL) == -1) {
+		perror("iotctl1");
+		exit(1);
+	}
+
+	if (ioctl(fd, UI_SET_RELBIT, REL_X) == -1) {
+		perror("iotctl2");
+		exit(1);
+	}
+
 	memset(&uid, 0, sizeof(uid));
 	memset(&usetup, 0, sizeof(usetup));
 	usetup.id = uid;
@@ -71,8 +81,16 @@ int main()
 	// necessary, waits to entire system to discover the new input device and handle events
 	sleep(1);
 
-	send_event(EV_KEY, KEY_SPACE, 1);
-	send_event(EV_KEY, KEY_SPACE, 0);
+	//send_event(EV_KEY, KEY_SPACE, 1);
+	//send_event(EV_KEY, KEY_SPACE, 0);
+
+	int i;
+	for (i = 0; i < 20; i++) {
+		send_event(EV_REL, REL_X, 10);
+		send_event(EV_REL, REL_Y, 10);
+		usleep(1500);
+	}
+
 
 	if (ioctl(fd, UI_DEV_DESTROY) == -1) {
 		perror("ioctl dev destroy");
