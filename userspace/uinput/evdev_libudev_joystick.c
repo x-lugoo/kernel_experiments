@@ -132,6 +132,8 @@ int main()
 		} else if (iev.type == EV_KEY && iev.value == 0) {
 			/* give the idea of motion in cursor */
 			for (i = 0; i < 20; i++) {
+				/* TODO: check is there is a way to make this part controller
+				 * agnostic */
 				if (iev.code == BTN_TOP)
 					emit_rel(uinput_ev, -5, 5);
 				else if (iev.code == BTN_TRIGGER)
