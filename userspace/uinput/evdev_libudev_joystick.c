@@ -10,6 +10,13 @@
 
 /* udev docs: https://www.freedesktop.org/software/systemd/man/#U */
 
+void emit_rel(struct libevdev_uinput *eui, int val_x, int val_y)
+{
+	libevdev_uinput_write_event(eui, EV_REL, REL_X, val_x);
+	libevdev_uinput_write_event(eui, EV_REL, REL_Y, val_y);
+	libevdev_uinput_write_event(eui, EV_SYN, SYN_REPORT, 0);
+}
+
 int main()
 {
 	struct udev *udev;
@@ -20,7 +27,7 @@ int main()
 
 	struct libevdev *ev= NULL, *uev = NULL;
 	struct libevdev_uinput *uinput_ev = NULL;
-	int fd, rc = 1, ufd, joyfound = 0;
+	int fd, rc = 1, ufd, joyfound = 0, i;
 
 	udev = udev_new();
 	if (!udev) {
@@ -88,6 +95,10 @@ int main()
 	libevdev_set_name(uev, "input_mapper");
 	libevdev_enable_event_code(uev, EV_KEY, KEY_LEFT, NULL);
 	libevdev_enable_event_code(uev, EV_KEY, KEY_RIGHT, NULL);
+	libevdev_enable_event_code(uev, EV_REL, REL_X, NULL);
+	libevdev_enable_event_code(uev, EV_REL, REL_Y, NULL);
+	/* this is needed to the Window Manager thinks it is a proper mouse and catch the events */
+	libevdev_enable_event_code(uev, EV_KEY, BTN_LEFT, NULL);
 
 	if (libevdev_uinput_create_from_device(uev, ufd, &uinput_ev)) {
 		fprintf(stderr, "uinput could not be created\n");
@@ -118,6 +129,19 @@ int main()
 			libevdev_uinput_write_event(uinput_ev, EV_SYN, SYN_REPORT, 0);
 			libevdev_uinput_write_event(uinput_ev, EV_KEY, key, 0);
 			libevdev_uinput_write_event(uinput_ev, EV_SYN, SYN_REPORT, 0);
+		} else if (iev.type == EV_KEY && iev.value == 0) {
+			/* give the idea of motion in cursor */
+			for (i = 0; i < 20; i++) {
+				if (iev.code == BTN_TOP)
+					emit_rel(uinput_ev, -5, 5);
+				else if (iev.code == BTN_TRIGGER)
+					emit_rel(uinput_ev, -5, -5);
+				else if (iev.code == BTN_THUMB)
+					emit_rel(uinput_ev, 5, -5);
+				else if (iev.code == BTN_THUMB2)
+					emit_rel(uinput_ev, 5, 5);
+				usleep(15000);
+			}
 		}
 	} while (rc == 0 || rc == 1 || rc == -EAGAIN);
 
