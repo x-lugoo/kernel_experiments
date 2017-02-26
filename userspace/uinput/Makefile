@@ -8,5 +8,6 @@ all:
 	$(CC) event_dev_info.c $(CFLAGS) -o event_dev_info
 	$(CC) hid_dev_info.c $(CFLAGS) -o hid_dev_info
 	$(CC) uinput_old_style.c $(CFLAGS) -o uinput_old_style
+	$(CC) joystick_interface.c $(CFLAGS) -o joystick_interface
 clean:
-	rm -rf uinput_kb evdev evdev_libudev_joystick event_dev_info hid_dev_info uinput_old_style
+	rm -rf uinput_kb evdev evdev_libudev_joystick event_dev_info hid_dev_info uinput_old_style joystick_interface
