@@ -17,6 +17,14 @@ void emit_rel(struct libevdev_uinput *eui, int val_x, int val_y)
 	libevdev_uinput_write_event(eui, EV_SYN, SYN_REPORT, 0);
 }
 
+void emit_click(struct libevdev_uinput *eui, int code)
+{
+	libevdev_uinput_write_event(eui, EV_KEY, code, 1);
+	libevdev_uinput_write_event(eui, EV_SYN, SYN_REPORT, 0);
+	libevdev_uinput_write_event(eui, EV_KEY, code, 0);
+	libevdev_uinput_write_event(eui, EV_SYN, SYN_REPORT, 0);
+}
+
 int main()
 {
 	struct udev *udev;
@@ -123,12 +131,8 @@ int main()
 
 		// redirect event to uinput, and convert to arrow keys
 		if (iev.type == EV_ABS && iev.code == ABS_X && (iev.value == 0 || iev.value == 255)) {
-			int key = iev.value == 0 ? KEY_LEFT : KEY_RIGHT;
-
-			libevdev_uinput_write_event(uinput_ev, EV_KEY, key, 1);
-			libevdev_uinput_write_event(uinput_ev, EV_SYN, SYN_REPORT, 0);
-			libevdev_uinput_write_event(uinput_ev, EV_KEY, key, 0);
-			libevdev_uinput_write_event(uinput_ev, EV_SYN, SYN_REPORT, 0);
+			emit_click(uinput_ev, iev.value == 0 ? KEY_LEFT
+								: KEY_RIGHT);
 		} else if (iev.type == EV_KEY && iev.value == 0) {
 			/* give the idea of motion in cursor */
 			for (i = 0; i < 20; i++) {
