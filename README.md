@@ -120,6 +120,42 @@ Sysfs manipulation (linux/sysfs.h, linux/kobject.h)
    /* to add more files, create more #_show, #_store, and new #_attrs */
    struct kobject \*child = sysfs_create_group(kobj, &attr_group);
    ```
+Lists (linux/list.h)
+--------------------
+   ```C
+   /* creates a list_head structure */
+   LIST_HEAD(dummy);
+   INIT_LIST_HEAD(&dummy);
+
+   /* all functions of the list API needs a list_head pointer, like bellow */
+   struct some_struct {
+           int id; 
+           struct list_head info_list;
+   };
+
+   srtuct some_struct *ss = kzalloc(sizeof(struct some_struct), GFP_KERNEL);
+   ss->id = 0;
+
+   /* add the new allocated struct to the dummy list. The new element will be placed in dummy->next */
+   list_add(&ss->info_list, &dummy);
+
+   /* add always on the list's tail */
+   list_add_tail(&ss->info_list, &dummy);
+
+   /* on deleting elements, we only need to previously added node */
+   list_del(&ss->info_list);
+
+   /* there are other methods to replace, move, check for number of elements and among others */
+   
+   /* to iterate over a list */
+   struct some_struct *node;
+   /* it receives a node to be the current entry, the list head, and the name
+    * of the struct member of a list_head */
+   for_each_list_entry(node, &dummy, list_info) {
+   	pr_info(node->id);
+   }
+   ```
+   
 ACPI object descriptions
 ------------------------
 ```sh
