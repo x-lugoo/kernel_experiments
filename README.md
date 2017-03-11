@@ -155,6 +155,44 @@ Lists (linux/list.h)
    	pr_info(node->id);
    }
    ```
+Memory allocation and caching (linux/slab.h)
+--------------------------------------------
+   ```C
+   /* to allocate memory on kernel, using size and flags */
+   struct foo *f = kmalloc(sizeof(struct foo), GFP_KERNEL);
+   
+   /* to see all flags related to memory allocation, take a look in linux/gfp.h
+   
+   /* to allocate zeroed memory */
+   struct foo *f =- kzalloc(sizeof(struct foo), GFP_KERNEL);
+   
+   /* allocate an array, using number of elements, size and flags */
+   struct foo **fl = kmalloc(5, sizeof(struct foo), GFP_KERNEL);
+   
+   /* allocating a zeroed array */
+   struct foo **fl = kcalloc(5, sizeof(struct foo), GFP_KERNEL);
+   
+   /* To allocate memory on linux cache, first create the kmem_cache */
+   struct kmem_cache *slab;
+   struct foo f;
+   
+   /* name of struct and flags. A complete list of flags can be found on slab.h, with the prefix SLAB_ */
+   slab = KMEM_CACHE(f, 0);
+   
+   /* all allocated memory will be the same size of f used before */
+   struct foo *tmp = kmem_cache_alloc(slab, GFP_KERNEL);
+   kmem_cache_free(slab, tmp);
+   
+   /* destroy kmem_cache (first be sure to remove all elements allocated in this cache entry */
+   kmem_cache_destroy(slab);
+   
+   /* 
+      Addicional info about slab:
+      Documentation/vm/slub.txt
+      tools/vm/slabinfo
+      /proc/slabinfo
+   */
+   ```
    
 ACPI object descriptions
 ------------------------
