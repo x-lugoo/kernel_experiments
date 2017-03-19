@@ -13,7 +13,7 @@ void send_event(int type, int code, int val)
 {
 	struct input_event ie;
 	memset(&ie, 0, sizeof(ie));
-	ie.type = EV_REL;
+	ie.type = type;
 	ie.code = code;
 	ie.value = val;
 
