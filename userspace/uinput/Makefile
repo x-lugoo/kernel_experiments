@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-Wall -Werror
+CFLAGS=-Wall -Werror -Wextra
 
 all:
 	$(CC) uinput_kb.c $(CFLAGS) -o uinput_kb
