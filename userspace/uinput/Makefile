@@ -3,6 +3,7 @@ CFLAGS=-Wall -Werror -Wextra
 
 all:
 	$(CC) uinput_kb.c $(CFLAGS) -o uinput_kb
+	$(CC) uinput_mouse.c $(CFLAGS) -o uinput_mouse
 	$(CC) evdev.c $(CFLAGS) -o evdev -I/usr/include/libevdev-1.0/ -levdev
 	$(CC) evdev_libudev_joystick.c $(CFLAGS) -o evdev_libudev_joystick -I/usr/include/libevdev-1.0/ -levdev -ludev
 	$(CC) event_dev_info.c $(CFLAGS) -o event_dev_info
@@ -10,4 +11,4 @@ all:
 	$(CC) uinput_old_style.c $(CFLAGS) -o uinput_old_style
 	$(CC) joystick_interface.c $(CFLAGS) -o joystick_interface
 clean:
-	rm -rf uinput_kb evdev evdev_libudev_joystick event_dev_info hid_dev_info uinput_old_style joystick_interface
+	rm -rf uinput_kb uinput_mouse evdev evdev_libudev_joystick event_dev_info hid_dev_info uinput_old_style joystick_interface
