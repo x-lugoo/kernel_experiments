@@ -68,11 +68,6 @@ int main()
 
 	memset(&uud, 0, sizeof(uud));
 	snprintf(uud.name, UINPUT_MAX_NAME_SIZE, "uinput_old_style");
-	uud.id.bustype = BUS_USB;
-	uud.id.vendor  = 0x1;
-	uud.id.product = 0x1;
-	uud.id.version = 1;
-
 	if (write(fd, &uud, sizeof(uud)) < 0) {
 		perror("write");
 		exit(1);
@@ -83,7 +78,7 @@ int main()
 		exit(1);
 	}
 
-	sleep(2);
+	sleep(1);
 
 	while (i < 100) {
 		emit_rel(REL_X, 5, 0);
