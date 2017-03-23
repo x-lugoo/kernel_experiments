@@ -12,10 +12,12 @@ int fd;
 void emit(int type, int code, int val)
 {
 	struct input_event ie;
-	memset(&ie, 0, sizeof(ie));
+
 	ie.type = type;
 	ie.code = code;
 	ie.value = val;
+	ie.time.tv_sec = 0;
+	ie.time.tv_usec = 0;
 
 	if (write(fd, &ie, sizeof(ie)) < 0) {
 		perror("write2");
@@ -23,17 +25,9 @@ void emit(int type, int code, int val)
 	}
 }
 
-void emit_rel(int code, int val, int syn)
-{
-	emit(EV_REL, code, val);
-	if (syn)
-		emit(EV_SYN, SYN_REPORT, 0);
-}
-
 int main()
 {
 	int i = 50;
-	struct input_id	uid;
 	struct uinput_setup usetup;
 
 	fd = open("/dev/uinput", O_WRONLY | O_NONBLOCK);
@@ -67,10 +61,10 @@ int main()
 		exit(1);
 	}
 
-	memset(&uid, 0, sizeof(uid));
 	memset(&usetup, 0, sizeof(usetup));
-	usetup.id = uid;
-	snprintf(usetup.name, UINPUT_MAX_NAME_SIZE, "uinput_old_style");
+	usetup.id.bustype = BUS_USB;
+	usetup.id.vendor = 0x1234;
+	snprintf(usetup.name, UINPUT_MAX_NAME_SIZE, "Example of uinput mouse");
 
 	if (ioctl(fd, UI_DEV_SETUP, &usetup) == -1) {
 		perror("dev setup");
@@ -87,8 +81,9 @@ int main()
 
 	/* move the mouse cursor to 5 units per axis */
 	while (i--) {
-		emit_rel(REL_X, 5, 0);
-		emit_rel(REL_Y, 5, 1);
+		emit(EV_REL, REL_X, 5);
+		emit(EV_REL, REL_Y, 5);
+		emit(EV_SYN, SYN_REPORT, 0);
 		usleep(15000);
 	}
 
