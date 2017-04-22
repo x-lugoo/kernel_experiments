@@ -9,13 +9,15 @@
 
 int fd;
 
-void send_event(int type, int code, int val)
+void emit(int type, int code, int val)
 {
 	struct input_event ie;
-	memset(&ie, 0, sizeof(ie));
+
 	ie.type = type;
 	ie.code = code;
 	ie.value = val;
+	ie.time.tv_sec = 0;
+	ie.time.tv_usec = 0;
 
 	if (write(fd, &ie, sizeof(ie)) < 0) {
 		perror("write2");
@@ -23,17 +25,10 @@ void send_event(int type, int code, int val)
 	}
 }
 
-void emit_rel(int code, int val, int syn)
-{
-	send_event(EV_REL, code, val);
-	if (syn)
-		send_event(EV_SYN, SYN_REPORT, 0);
-}
-
 int main()
 {
-	int i = 0;
-	struct uinput_user_dev uud;
+	int i = 50;
+	struct uinput_setup usetup;
 
 	fd = open("/dev/uinput", O_WRONLY | O_NONBLOCK);
 	if (fd == -1) {
@@ -66,10 +61,13 @@ int main()
 		exit(1);
 	}
 
-	memset(&uud, 0, sizeof(uud));
-	snprintf(uud.name, UINPUT_MAX_NAME_SIZE, "uinput_old_style");
-	if (write(fd, &uud, sizeof(uud)) < 0) {
-		perror("write");
+	memset(&usetup, 0, sizeof(usetup));
+	usetup.id.bustype = BUS_USB;
+	usetup.id.vendor = 0x1234;
+	snprintf(usetup.name, UINPUT_MAX_NAME_SIZE, "Example of uinput mouse");
+
+	if (ioctl(fd, UI_DEV_SETUP, &usetup) == -1) {
+		perror("dev setup");
 		exit(1);
 	}
 
@@ -78,13 +76,15 @@ int main()
 		exit(1);
 	}
 
+	/* wait some time to let the Window Manager to get the new virtual device */
 	sleep(1);
 
-	while (i < 100) {
-		emit_rel(REL_X, 5, 0);
-		emit_rel(REL_Y, 5, 1);
+	/* move the mouse cursor to 5 units per axis */
+	while (i--) {
+		emit(EV_REL, REL_X, 5);
+		emit(EV_REL, REL_Y, 5);
+		emit(EV_SYN, SYN_REPORT, 0);
 		usleep(15000);
-		i++;
 	}
 
 	if (ioctl(fd, UI_DEV_DESTROY) == -1) {

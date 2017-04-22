@@ -1,8 +1,9 @@
 CC=gcc
-CFLAGS=-Wall -Werror
+CFLAGS=-Wall -Werror -Wextra
 
 all:
 	$(CC) uinput_kb.c $(CFLAGS) -o uinput_kb
+	$(CC) uinput_mouse.c $(CFLAGS) -o uinput_mouse
 	$(CC) evdev.c $(CFLAGS) -o evdev -I/usr/include/libevdev-1.0/ -levdev
 	$(CC) evdev_libudev.c $(CFLAGS) -o evdev_libudev -I/usr/include/libevdev-1.0/ -levdev -ludev
 	$(CC) event_dev_info.c $(CFLAGS) -o event_dev_info
