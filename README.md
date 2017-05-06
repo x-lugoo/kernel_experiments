@@ -3,7 +3,10 @@
 Building Tips
 =============
 
-1. To build only one module, you can type **make path/the/the/module.ko**, and if you want to build all modules of a path, just execute **make path/to/dir**.
+1. To build only one module or modules in a specific path:
+	- **make path/the/the/module.ko**
+	- **make path/to/dir**
+	- **make M=path/to/dir**
 
 Problem solving
 ===============
