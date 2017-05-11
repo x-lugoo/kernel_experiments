@@ -8,6 +8,9 @@ Building Tips
 	- **make path/to/dir**
 	- **make M=path/to/dir**
 
+2. To use sparse when building modules, use C=1 parameter of make:
+	- **make C=1 M=path/to/dir**
+
 Problem solving
 ===============
 
