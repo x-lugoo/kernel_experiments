@@ -199,6 +199,46 @@ Memory allocation and caching (linux/slab.h)
       /proc/slabinfo
    */
    ```
+Wait Queues (linux/wait.h)
+--------------------------
+   ```C
+   /* Wait queues are used to manage threads to wait for some condition,
+    * blocking them until this condition becomes true.
+    * To allocate a new wait queue:
+   DECLARE_WAIT_QUEUE_HEAD(wqh);
+
+   /* to stop one thread until a certain condition is reached */
+   wait_event_interruptible(wqh, cond);
+
+   /* this makes the thread to sleep until cond is true (cond is an int) */
+   ```
+Kernel Threads (linux/kthread.h)
+--------------------------------
+   ```C
+   /* Multiple processing points working on the same process at the same point
+    * Your should block it when not using (this block is done with wait queues)
+    * Very similar to user level pthreads
+    *	one or more pthreads will map to a single kthread
+    **/
+
+   /* To create a new kthread */
+   int cond = 0;
+   static int func(void *data)
+   {
+	while (kthread_should_stop())
+		wait_event_interruptible(wqh, cond);
+	return 0;
+   };
+
+   struct task_struct *tk = kthread_run(func, NULL /* data */, "kthread_name");
+
+   /* do some work, make cond be true, and then stop the thread at exit */
+   kthread_stop(tk);
+
+   /* kthread_stop sets the kthread_should_stop bit of the thread, and so it
+    * finishes the loop
+    **/
+   ```
    
 ACPI object descriptions
 ------------------------
