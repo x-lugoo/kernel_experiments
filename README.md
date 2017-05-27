@@ -250,8 +250,8 @@ Kernel Threads (linux/kthread.h)
    /* do some work, make cond be true, and then stop the thread at exit */
    kthread_stop(tk);
 
-   /* kthread_stop sets the kthread_should_stop bit of the thread, and so it
-    * finishes the loop
+   /* kthread_stop sets the kthread_should_stop bit of the kthread, waking the
+    * thread again, making possible to finish the execution
     **/
    ```
    
