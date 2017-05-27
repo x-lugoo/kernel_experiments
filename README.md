@@ -218,6 +218,15 @@ Wait Queues (linux/wait.h)
 
    / Before waking the kthread, make sure to set the condition to true */
    ```
+
+Delaying execution in kernel (linux/delay.h)
+----------------------------------
+   ```C
+   /* this header add some routines to delay execution. The funtion below makes
+    * a kthread sleep for X seconds, 5 in this example:
+    */
+   ssleep(5);
+   ```
 Kernel Threads (linux/kthread.h)
 --------------------------------
    ```C
