@@ -199,6 +199,14 @@ Memory allocation and caching (linux/slab.h)
       /proc/slabinfo
    */
    ```
+Kernel time (linux/ktime.h)
+---------------------------
+   ```C
+   Nanosecond scalar representation for kernel time values (extracted from ktime.h)
+
+   ktime_t t = ktime_set(seconds, nanoseconds);
+   ```
+
 Wait Queues (linux/wait.h)
 --------------------------
    ```C
@@ -210,6 +218,9 @@ Wait Queues (linux/wait.h)
    /* this will put the kthread to sleep if the condition if false, until
     * somebody wakes it up again */
    wait_event_interruptible(wqh, cond);
+
+   /* you can also check for a condition, or have a timeout to wait for */
+   wait_event_interruptible_hrtimeout(wqh, cond, t /* see ktime_t section */);
 
    /* the call bellow wakes up all processes that are in the same wait queue, 
     * and when the process wakes up again, it will check the condition again,
