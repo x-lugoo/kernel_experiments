@@ -207,10 +207,16 @@ Wait Queues (linux/wait.h)
     * To allocate a new wait queue:
    DECLARE_WAIT_QUEUE_HEAD(wqh);
 
-   /* to stop one thread until a certain condition is reached */
+   /* this will put the kthread to sleep if the condition if false, until
+    * somebody wakes it up again */
    wait_event_interruptible(wqh, cond);
 
-   /* this makes the thread to sleep until cond is true (cond is an int) */
+   /* the call bellow wakes up all processes that are in the same wait queue, 
+    * and when the process wakes up again, it will check the condition again,
+    * and if it is true, so the process continues */
+   wake_up_interruptible(&wqh);
+
+   / Before waking the kthread, make sure to set the condition to true */
    ```
 Kernel Threads (linux/kthread.h)
 --------------------------------
