@@ -1,7 +1,3 @@
-add_project_arguments(['-Wall', '-Werror', '-Wextra', '-I/usr/include/libevdev-1.0'], language: 'c')
-dep_libevdev = dependency('libevdev')
-dep_udev = dependency('libudev')
-
 executable('uinput_kb', 'uinput_kb.c')
 executable('uinput_mouse', 'uinput_mouse.c')
 executable('event_dev_info', 'event_dev_info.c')
