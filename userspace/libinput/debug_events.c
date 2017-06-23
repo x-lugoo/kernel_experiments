@@ -106,7 +106,7 @@ int main()
 	}
 
 	li = libinput_udev_create_context(&interface, NULL, udev);
-	if (li) {
+	if (!li) {
 		fprintf(stderr, "Failed to init context from udev\n");
 		goto udev_out;
 	}
