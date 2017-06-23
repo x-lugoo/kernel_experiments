@@ -5,7 +5,7 @@
 int main(void)
 {
 	int cpu;
-	if (syscall(309, &cpu, NULL, NULL) == -1)
+	if (syscall(SYS_getcpu, &cpu, NULL, NULL) == -1)
 		perror("syscall");
 
 	printf("CPU: %d\n", cpu);
