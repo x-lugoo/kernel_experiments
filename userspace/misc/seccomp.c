@@ -13,48 +13,44 @@
 
 #define FTEST "/tmp/test"
 
-static int strict;
-
 void check_strict()
 {
-	if (strict) {
-		int ret;
+	int ret;
 
-		printf("Setting seccomp...\n");
+	printf("Setting seccomp...\n");
 
-		// TODO: check why this doesn't work
-		//ret = seccomp(SECCOMP_MODE_STRICT, 0, NULL);
-		ret = prctl(PR_SET_SECCOMP, SECCOMP_MODE_STRICT);
-		if (ret) {
-			perror("seccomp");
-			exit(1);
-		}
-
-		printf("seccomp set, try redirecting stderr to stdout (should be killed)\n");
+	// TODO: check why this doesn't work
+	//ret = seccomp(SECCOMP_MODE_STRICT, 0, NULL);
+	ret = prctl(PR_SET_SECCOMP, SECCOMP_MODE_STRICT);
+	if (ret) {
+		perror("seccomp");
+		exit(1);
 	}
+
+	printf("seccomp set, try redirecting stderr to stdout (should be killed)\n");
 
 	dup2(1, 2);
 
-	if (strict)
-		printf("Should not be printed\n");
+	printf("Should not be printed\n");
 }
 
 int main(int argc, char **argv)
 {
 	int opt;
 
-	while ((opt = getopt(argc, argv, "s")) != -1) {
+	while ((opt = getopt(argc, argv, "sf")) != -1) {
 		switch (opt) {
 		case 's':
-			strict = 1;
+			check_strict();
+			break;
+		case 'f':
+			//check_filter();
 			break;
 		default:
 			fprintf(stderr, "Usage: -s (for strict)\n");
 			exit(EXIT_FAILURE);
 		}
 	}
-
-	check_strict();
 
 	return 0;
 }
