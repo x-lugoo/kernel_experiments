@@ -40,9 +40,10 @@ Semaphores and mutexes (linux/semaphore.h, linux/mutex.h)
    /* to lock/unlock an semaphore */
    int down_interruptible(struct semaphore *sem); /* locks but available to be interrupted by signal */
    void up(struct semaphore *sem); /* unlocks the up */
+   DEFINE_MUTEX(my_mutex);
    /* to lock/unlock mutexes */
-   mutex_lock(struct mutex *m);
-   mutex_unlock(struct mutex *m);
+   mutex_lock(&my_mutex);
+   mutex_unlock(&my_mutex);
    ```
 
 Misc Device (linux/miscdevice.h)
