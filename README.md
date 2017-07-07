@@ -24,7 +24,7 @@ Device Driver Notes and Useful Functions
 1. When the **init function** returns < 0, insmod call **fails** and don't load the specified module
 2. If **readv**/**writev** are not specified, **read**/**write** are called multiple times
    - When **read**/**write** returns a positive number, it checks if the number is smaller to the *count* parameter, if yes, then **read**/**write** will be called again, but this time will have a new value (older count - the returned value from last read/write call), and this will repeat until count reaches zero
-   
+
 Manipulate *proc* directories (linux/proc_fs.h)
 -----------------------------------------------
    ```C
@@ -33,7 +33,7 @@ Manipulate *proc* directories (linux/proc_fs.h)
                                           const struct file_operations *proc_fops);
    void remove_proc_entry(const char *, struct proc_dir_entry *);
    ```
-   
+
 Semaphores and mutexes (linux/semaphore.h, linux/mutex.h)
 ----------------------------------------------------------
    ```C
@@ -48,10 +48,20 @@ Semaphores and mutexes (linux/semaphore.h, linux/mutex.h)
 
 Misc Device (linux/miscdevice.h)
 -----------------------------------
-   - Easy way to setup a simple device driver, like scull, that does nothing special
-   - **misc_register** and **misc_deregister** does all the hard work.
-   - If *probe* and *exit* functions just *register*/*deregister* a misc device, use **module_misc_device(struct miscdevice \*)**
-   instead
+   ```C
+   /* Easy way to setup a simple device driver, like scull, that does nothing special */
+   struct miscdevice misc = {
+	   .minor = MISC_DYNAMIC_MINOR,
+	   .name = "misc_dev"
+	   .fops = &misc_fops
+	   .mode = 0444
+   };
+   int ret = misc_register(&misc);
+   misc_deregister(&misc);
+
+   /* to setup a new module with does nothing special at probe/exit */
+   module_misc_module(&misc);
+   ```
 
 Create Device (linux/device.h)
 ------------------------------
