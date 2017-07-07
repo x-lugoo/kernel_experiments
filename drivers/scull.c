@@ -33,7 +33,6 @@ struct scull_dev {
 	unsigned long size; /// amount of data stored
 	unsigned int access_key; /// used by sculluid and scullpriv
 	struct semaphore sem; /// mutex semaphore
-	struct miscdevice misc;
 };
 
 static struct scull_dev *scull_dev;
@@ -203,23 +202,6 @@ static int scull_open(struct inode *inode, struct file *filp)
 	return 0;
 }
 
-static int scull_proc_show(struct seq_file *sf, void *v)
-{
-	seq_printf(sf, "%d\n", scull_dev->misc.minor);
-	return 0;
-}
-
-static int scull_proc_open(struct inode *inode, struct file *file)
-{
-	return single_open(file, scull_proc_show, NULL);
-}
-
-static const struct file_operations scull_proc_ops = {
-	.owner = THIS_MODULE,
-	.open = scull_proc_open,
-	.read = seq_read,
-};
-
 static long scull_ioctl(struct file *filp, unsigned int cmd
 			,unsigned long arg)
 {
@@ -241,6 +223,30 @@ static const struct file_operations scull_fops = {
 	.open =    scull_open,
 	.release = scull_release,
 	.unlocked_ioctl = scull_ioctl,
+};
+
+static struct miscdevice misc = {
+	.minor = MISC_DYNAMIC_MINOR,
+	.name = "scull0",
+	.fops = &scull_fops,
+	.mode = S_IRUGO | S_IWUGO
+};
+
+static int scull_proc_show(struct seq_file *sf, void *v)
+{
+	seq_printf(sf, "%d\n", misc.minor);
+	return 0;
+}
+
+static int scull_proc_open(struct inode *inode, struct file *file)
+{
+	return single_open(file, scull_proc_show, NULL);
+}
+
+static const struct file_operations scull_proc_ops = {
+	.owner = THIS_MODULE,
+	.open = scull_proc_open,
+	.read = seq_read,
 };
 
 static int scull_proc_init(void)
@@ -277,16 +283,11 @@ static int __init scull_init(void)
 	scull_dev->qset = scull_qset;
 	sema_init(&scull_dev->sem, 1);
 
-	scull_dev->misc.name = "scull0";
-	scull_dev->misc.minor = MISC_DYNAMIC_MINOR;
-	scull_dev->misc.fops = &scull_fops;
-	scull_dev->misc.mode = S_IRUGO | S_IWUGO;
-
-	if (misc_register(&scull_dev->misc) || scull_proc_init())
+	if (misc_register(&misc) || scull_proc_init())
 		goto free_dev;
 
 	pr_info("%s load success. minor=%d, qset=%d and quantum=%d\n", __func__
-		, scull_dev->misc.minor, scull_qset, scull_quantum);
+		, misc.minor, scull_qset, scull_quantum);
 	return 0;
 
 free_dev:
@@ -298,7 +299,7 @@ err:
 static void __exit scull_exit(void)
 {
 	scull_proc_exit();
-	misc_deregister(&scull_dev->misc);
+	misc_deregister(&misc);
 	kfree(scull_dev);
 }
 
