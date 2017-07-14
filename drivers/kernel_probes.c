@@ -11,7 +11,7 @@ static bool capable_proxy(int cap)
 static struct jprobe jp = {
 	.entry = capable_proxy,
 	.kp = {
-		.symbol_name = "_do_fork",
+		.symbol_name = "capable",
 	},
 };
 
