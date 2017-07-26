@@ -163,7 +163,7 @@ Lists (linux/list.h)
    list_del(&ss->info_list);
 
    /* there are other methods to replace, move, check for number of elements and among others */
-   
+
    /* to iterate over a list */
    struct some_struct *node;
    /* it receives a node to be the current entry, the list head, and the name
@@ -177,32 +177,32 @@ Memory allocation and caching (linux/slab.h)
    ```C
    /* to allocate memory on kernel, using size and flags */
    struct foo *f = kmalloc(sizeof(struct foo), GFP_KERNEL);
-   
+
    /* to see all flags related to memory allocation, take a look in linux/gfp.h
-   
+
    /* to allocate zeroed memory */
    struct foo *f =- kzalloc(sizeof(struct foo), GFP_KERNEL);
-   
+
    /* allocate an array, using number of elements, size and flags */
    struct foo **fl = kmalloc(5, sizeof(struct foo), GFP_KERNEL);
-   
+
    /* allocating a zeroed array */
    struct foo **fl = kcalloc(5, sizeof(struct foo), GFP_KERNEL);
-   
+
    /* To allocate memory on linux cache, first create the kmem_cache */
    struct kmem_cache *slab;
    struct foo f;
-   
+
    /* name of struct and flags. A complete list of flags can be found on slab.h, with the prefix SLAB_ */
    slab = KMEM_CACHE(f, 0);
-   
+
    /* all allocated memory will be the same size of f used before */
    struct foo *tmp = kmem_cache_alloc(slab, GFP_KERNEL);
    kmem_cache_free(slab, tmp);
-   
+
    /* destroy kmem_cache (first be sure to remove all elements allocated in this cache entry */
    kmem_cache_destroy(slab);
-   
+
    /* 
       Addicional info about slab:
       Documentation/vm/slub.txt
@@ -276,7 +276,25 @@ Kernel Threads (linux/kthread.h)
     * thread again, making possible to finish the execution
     **/
    ```
-   
+
+Networking
+==========
+
+Netfilter (linux/netfilter\*.h)
+-------------------------------
+   ```C
+   /* to register/unregister new hooks */
+   int ret = nf_register_hook(struct nf_hook_ops *hook);
+   nf_nregister_hook(struct nf_hook_ops *hook);
+   ```
+TCP (linux/tcp.h)
+-----------------
+   ```C
+   /* get header and header length of the tcp header from a socket buffer */
+   struct tcphdr *t = tcp_hdr(struct sk_buff *skb);
+   unsigned int tcplen = tcp_hdrlen(struct sk_buff *skb);
+   ```
+
 ACPI object descriptions
 ------------------------
 ```sh
