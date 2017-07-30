@@ -1,6 +1,7 @@
 obj-m += scull.o
 obj-m += simple_module.o
 obj-m += kernel_probes.o
+obj-m += netfilter.o
 
 SRC=/lib/modules/$(shell uname -r)/build
 
