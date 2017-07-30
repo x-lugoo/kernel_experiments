@@ -314,6 +314,16 @@ TCP (linux/tcp.h)
    unsigned int tcplen = tcp_hdrlen(struct sk_buff *skb);
    ```
 
+Socket Buffer (linux/skbuff.h)
+------------------------------
+   ```C
+   /* to searchh for data inside a socket data. It returns the position of
+    * the string, or UINT_MAX is the pattern wasn't found */
+   unsigned int ret = skb_find_text(struc sk_buff *skb, unsigned int from
+					, unsigned int to
+					, struct ts_config *config);
+   ```
+
 ACPI object descriptions
 ------------------------
 ```sh
