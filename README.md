@@ -277,6 +277,25 @@ Kernel Threads (linux/kthread.h)
     **/
    ```
 
+Text Search (linux/textsearch.h)
+  ```C
+  /* generic text search interface */
+  #define STR "findme"
+  /* prepare ts struct using kmp (it could be fsm, or bm) to search for STR
+  struct ts_config *ts = textsearch_prepare("kmp", STR, strlen(STR), GFP_KERNEL
+  					, TS_AUTOLOAD);
+
+  /* check error */
+  if (IS_ERR(ts))
+	  return PTR_ERR(ts);
+
+  /* try to search for a pattern inside a socket buffer */
+  ret = skb_find_text(skb, tcp_hdrlen(skb), skb->len, ts);
+
+  if (ret != UINT_MAX)
+  	pr_info("String found\n");
+  ```
+
 Networking
 ==========
 
