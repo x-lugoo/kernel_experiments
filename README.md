@@ -282,7 +282,7 @@ Text Search (linux/textsearch.h)
   ```C
   /* generic text search interface */
   #define STR "findme"
-  /* prepare ts struct using kmp (it could be fsm, or bm) to search for STR
+  /* prepare ts struct using kmp (it could be fsm, or bm) to search for STR */
   struct ts_config *ts = textsearch_prepare("kmp", STR, strlen(STR), GFP_KERNEL
   					, TS_AUTOLOAD);
 
