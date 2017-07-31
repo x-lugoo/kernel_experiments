@@ -278,6 +278,7 @@ Kernel Threads (linux/kthread.h)
    ```
 
 Text Search (linux/textsearch.h)
+--------------------------------
   ```C
   /* generic text search interface */
   #define STR "findme"
