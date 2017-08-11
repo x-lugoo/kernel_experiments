@@ -10,7 +10,6 @@
 int main(int argc, char **argv)
 {
 	int ret, fd;
-	char buf[12];
 	struct fat_boot_sector fbs;
 
 	if (argc != 2) {
@@ -30,13 +29,10 @@ int main(int argc, char **argv)
 		exit(EXIT_FAILURE);
 	}
 
-	if (fbs.fats == 2)
-		snprintf(buf, 11, "%s", fbs.fat32.vol_label);
+	if (fbs.fats == 32)
+		printf("%.11s\n", fbs.fat32.vol_label);
 	else
-		snprintf(buf, 11, "%s", fbs.fat16.vol_label);
-
-	buf[strlen(buf)] = '\0';
-	printf("label: %s\n", buf);
+		printf("%.11s\n", fbs.fat16.vol_label);
 
 	if (close(fd)) {
 		perror("close");
