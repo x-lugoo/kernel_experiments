@@ -57,7 +57,7 @@ int main()
 	memset(&usetup, 0, sizeof(usetup));
 	usetup.id.bustype = BUS_USB;
 	usetup.id.vendor = 0x1234; /* dummy vendor */
-	strcpy(usetup.name, "My uinput keyboard");
+	strncpy(usetup.name, "My uinput keyboard", sizeof(usetup.name));
 
 	if (ioctl(fd, UI_DEV_SETUP, &usetup) == -1) {
 		perror("dev setup");
