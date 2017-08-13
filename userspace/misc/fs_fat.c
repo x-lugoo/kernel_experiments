@@ -29,10 +29,20 @@ int main(int argc, char **argv)
 		exit(EXIT_FAILURE);
 	}
 
-	if (fbs.fats == 32)
-		printf("%.11s\n", fbs.fat32.vol_label);
-	else
-		printf("%.11s\n", fbs.fat16.vol_label);
+	printf("system_id: %s\nSectors per Cluster: %d\n"
+			, fbs.system_id
+			, fbs.sec_per_clus);
+
+	/* 8 == FAT32, 4 == FAT16 */
+	if (fbs.sec_per_clus == 8) {
+		printf("Label %.11s\nFS type: %s\n"
+				, fbs.fat32.vol_label
+				, fbs.fat32.fs_type);
+	} else {
+		printf("Label %.11s\nFS type: %s\n"
+				, fbs.fat16.vol_label
+				, fbs.fat16.fs_type);
+	}
 
 	if (close(fd)) {
 		perror("close");
