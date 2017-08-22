@@ -307,6 +307,10 @@ module_init(scull_init);
 module_exit(scull_exit);
 
 MODULE_LICENSE("GPL");
-MODULE_INFO(About, "Marcos' scull implementation, with some differences :)");
-MODULE_AUTHOR("Marcos Paulo de Souza <marcos.souza.org@gmail.com>");
+MODULE_DESCRIPTION("Marcos' scull implementation, with some differences :)");
+MODULE_INFO(About, "Modulo made just for study purposes");
 MODULE_ALIAS("scull");
+MODULE_VERSION("0.1");
+MODULE_AUTHOR("Marcos Paulo de Souza <marcos.souza.org@gmail.com>");
+MODULE_PARM_DESC(scull_qset, "Array size");
+MODULE_PARM_DESC(scull_quantum, "Size of an element in qset");
