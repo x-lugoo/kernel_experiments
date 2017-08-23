@@ -3,6 +3,7 @@ add_project_arguments(['-Wall', '-Werror', '-Wextra', '-I/usr/include/libevdev-1
 dep_libevdev = dependency('libevdev')
 dep_udev = dependency('libudev')
 dep_libinput = dependency('libinput')
+dep_libseccomp = dependency('libseccomp')
 
 executable('uinput_kb', 'userspace/uinput/uinput_kb.c')
 executable('uinput_mouse', 'userspace/uinput/uinput_mouse.c')
@@ -20,7 +21,9 @@ executable('ibinput_debug_events', 'userspace/libinput/debug_events.c'
 
 executable('syscall_getcpu', 'userspace/misc/syscall_getcpu.c')
 executable('seccomp', 'userspace/misc/seccomp.c')
+executable('seccomp_filter', 'userspace/misc/seccomp_filter.c'
+	, dependencies: [dep_libseccomp])
+
 executable('fs_fat', 'userspace/misc/fs_fat.c')
-executable('fs_ioctl_fat', 'userspace/misc/fs_ioctl_fat.c')
 executable('netlink_route', 'userspace/misc/netlink_route.c')
 executable('netlink_kobject_uevent', 'userspace/misc/netlink_kobject_uevent.c')
