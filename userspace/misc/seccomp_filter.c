@@ -12,7 +12,7 @@ int main(void)
 	printf("Init seccomp ctx to KILL all syscalls\n");
 	ctx = seccomp_init(SCMP_ACT_KILL);
 	if (ctx == NULL) {
-		perror("err1");
+		perror("seccomp_init");
 		goto out;
 	}
 
@@ -20,35 +20,36 @@ int main(void)
 
 	ret = seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(write), 0);
 	if (ret != 0) {
-		perror("err2");
+		perror("seccomp_rule_add write");
 		goto out;
 	}
 
 	ret = seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(exit), 0);
 	if (ret != 0) {
-		perror("err3");
+		perror("seccomp_rule_add exit");
 		goto out;
 	}
 
 	ret = seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(exit_group), 0);
 	if (ret != 0) {
-		perror("err4");
+		perror("seccomp_rule_add exit_group");
 		goto out;
 	}
 
 	ret = seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(open), 0);
 	if (ret != 0) { 
-		perror("err6");
+		perror("seccomp_rule_add open");
 		goto out;
 	}
 
 	ret = seccomp_load(ctx);
 	if (ret != 0) {
-		perror("err7");
+		perror("seccomp_load");
 		goto out;
 	}
 
 	printf("We now should die, as close syscall is not enabled...\n");
+
 	close(2);
 
 	printf("This message shoul not appear!!\n");
