@@ -27,3 +27,4 @@ executable('seccomp_filter', 'userspace/misc/seccomp_filter.c'
 executable('fs_fat', 'userspace/misc/fs_fat.c')
 executable('netlink_route', 'userspace/misc/netlink_route.c')
 executable('netlink_kobject_uevent', 'userspace/misc/netlink_kobject_uevent.c')
+executable('user', 'userspace/misc/user.c')
