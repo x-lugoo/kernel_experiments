@@ -4,6 +4,7 @@ dep_libevdev = dependency('libevdev')
 dep_udev = dependency('libudev')
 dep_libinput = dependency('libinput')
 dep_libseccomp = dependency('libseccomp')
+dep_libcap = dependency('libcap')
 
 executable('uinput_kb', 'userspace/uinput/uinput_kb.c')
 executable('uinput_mouse', 'userspace/uinput/uinput_mouse.c')
@@ -28,3 +29,5 @@ executable('fs_fat', 'userspace/misc/fs_fat.c')
 executable('netlink_route', 'userspace/misc/netlink_route.c')
 executable('netlink_kobject_uevent', 'userspace/misc/netlink_kobject_uevent.c')
 executable('user', 'userspace/misc/user.c')
+executable('caps', 'userspace/misc/caps.c'
+	, dependencies: [dep_libcap])
