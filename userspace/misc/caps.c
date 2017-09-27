@@ -9,22 +9,6 @@
 
 cap_value_t cap_list[CAP_LAST_CAP+1];
 
-void show_cap(cap_t cap, cap_flag_t cap_id, const char *cap_name)
-{
-	cap_flag_value_t cap_val;
-
-	cap_from_name(cap_name, &cap_list[cap_id]);
-
-	cap_get_flag(cap, cap_list[cap_id], CAP_EFFECTIVE, &cap_val);
-	printf("%s\tEFFECTIVE: %-4s ", cap_name, (cap_val == CAP_SET) ? "OK" : "NOK");
-
-	cap_get_flag(cap, cap_list[cap_id], CAP_PERMITTED, &cap_val);
-	printf("PERMITTED: %-4s ", (cap_val == CAP_SET) ? "OK" : "NOK");
-
-	cap_get_flag(cap, cap_list[cap_id], CAP_INHERITABLE, &cap_val);
-	printf("INHERITABLE %-4s\n", (cap_val == CAP_SET) ? "OK" : "NOK");
-}
-
 void set_cap(cap_t cap, cap_flag_t flag, cap_flag_value_t flag_val, int num)
 {
 	if (cap_set_flag(cap, flag, num, cap_list, flag_val)) {
@@ -50,8 +34,7 @@ int main(void)
 
 	printf("Show cap from privilegied user\n");
 	/* show cap as privilegied user */
-	show_cap(cap, CAP_SETUID, "cap_setuid");
-	show_cap(cap, CAP_SYS_ADMIN, "cap_sys_admin");
+	printf("%s\n", cap_to_text(cap, NULL));
 
 	cap_list[0] = CAP_SETUID;
 	cap_list[1] = CAP_SYS_ADMIN;
@@ -59,11 +42,11 @@ int main(void)
 	set_cap(cap, CAP_EFFECTIVE, CAP_CLEAR, 2);
 	set_cap(cap, CAP_PERMITTED, CAP_CLEAR, 2);
 
+	printf("\nRemoving CAP_SETUID and CAP_SYS_ADMIN from root\n");
 	cap_set_proc(cap);
 
-	printf("Show caps again\n");
-	show_cap(cap, CAP_SETUID, "cap_setuid");
-	show_cap(cap, CAP_SYS_ADMIN, "cap_sys_admin");
+	printf("\nShow caps again\n");
+	printf("%s\n", cap_to_text(cap, NULL));
 
 	if (setuid(99) == 0) {
 		printf("user: %d, %d\n", getuid(), geteuid());
