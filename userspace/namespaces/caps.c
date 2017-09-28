@@ -5,6 +5,7 @@
 #include <unistd.h>
 
 #include <sys/capability.h>
+#include <sys/prctl.h>
 #include <sys/types.h>
 
 cap_value_t cap_list[CAP_LAST_CAP+1];
@@ -29,6 +30,11 @@ int main(void)
 	cap = cap_get_pid(getpid());
 	if (!cap) {
 		perror("cap_get_pid");
+		exit(EXIT_FAILURE);
+	}
+
+	if (prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0) < 0) {
+		perror("prctl");
 		exit(EXIT_FAILURE);
 	}
 

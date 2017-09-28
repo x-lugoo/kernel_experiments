@@ -5,6 +5,7 @@
 #include <sched.h>
 
 #include <sys/capability.h>
+#include <sys/prctl.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
@@ -61,7 +62,13 @@ int main(int argc, char **argv)
 	if (clone_pid)
 		clone_flags |= CLONE_NEWPID;
 
+	printf("Parent\n");
 	show_caps();
+
+	if (prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0) <0) {
+		perror("prctl");
+		exit(EXIT_FAILURE);
+	}
 
 	pid = clone(childFunc, child_stack + STACK_SIZE /* stack growsdownward */
 			, clone_flags, NULL);
