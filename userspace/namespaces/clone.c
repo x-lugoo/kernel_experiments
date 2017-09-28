@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <sched.h>
 
+#include <sys/capability.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
@@ -11,11 +12,24 @@
 #define STACK_SIZE (1024 * 1024)
 static char child_stack[STACK_SIZE];
 
+static void show_caps()
+{
+	cap_t cap;
+
+	cap = cap_get_proc();
+	if (!cap) {
+		perror("cap_get_proc");
+		return;
+	}
+	printf("PID: %d, UID: %d, GID: %d\n", getpid(), getuid(), getgid());
+	printf("\tcaps: %s\n", cap_to_text(cap, NULL));
+}
+
 static int childFunc(void *arg)
 {
 	(void)arg;
 	printf("Child inside namespace\n");
-	printf("\tPID: %d, UID: %d, GID: %d\n", getpid(), getuid(), getgid());
+	show_caps();
 
 	return 0;
 }
@@ -46,6 +60,8 @@ int main(int argc, char **argv)
 		clone_flags |= CLONE_NEWUSER;
 	if (clone_pid)
 		clone_flags |= CLONE_NEWPID;
+
+	show_caps();
 
 	pid = clone(childFunc, child_stack + STACK_SIZE /* stack growsdownward */
 			, clone_flags, NULL);

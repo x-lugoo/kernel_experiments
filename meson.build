@@ -32,4 +32,5 @@ executable('netlink_kobject_uevent', 'userspace/misc/netlink_kobject_uevent.c')
 executable('user', 'userspace/namespaces/user.c')
 executable('caps', 'userspace/namespaces/caps.c'
 	, dependencies: [dep_libcap])
-executable('clone', 'userspace/namespaces/clone.c')
+executable('clone', 'userspace/namespaces/clone.c'
+	, dependencies: [dep_libcap])
