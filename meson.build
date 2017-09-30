@@ -34,3 +34,5 @@ executable('caps', 'userspace/namespaces/caps.c'
 	, dependencies: [dep_libcap])
 executable('clone', 'userspace/namespaces/clone.c'
 	, dependencies: [dep_libcap])
+executable('uts', 'userspace/namespaces/uts.c'
+	, dependencies: [dep_libcap])
