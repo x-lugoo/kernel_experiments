@@ -2,6 +2,7 @@
 
 #include <fcntl.h> /* O_RDONLY */
 #include <sched.h> /* clone(), setns() */
+#include <signal.h> /* signal() */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h> /* strlen() */
@@ -14,16 +15,32 @@
 static char child_stack1[STACK_SIZE];
 static char child_stack2[STACK_SIZE];
 
+static void set_signals(struct sigaction *sigact, sigset_t *waitset)
+{
+	sigemptyset(&(sigact->sa_mask));
+	sigemptyset(waitset);
+
+	sigaction(SIGUSR1, sigact, NULL);
+	sigaddset(waitset, SIGUSR1);
+
+	sigprocmask(SIG_BLOCK, waitset, NULL);
+}
+
 static int new_utsns(void *arg)
 {
 	struct utsname uts;
-	int pid = getpid();
+	struct sigaction sigact;
+	sigset_t waitset;
+	int sig, pid = getpid();
+
+	set_signals(&sigact, &waitset);
 
 	if (uname(&uts) == -1) {
 		perror("uname");
 		exit(EXIT_FAILURE);
 	}
-	printf("(%d) uts.nodename (before sethosnamet): %s\n", pid
+
+	printf("(%d) uts.nodename (before sethostname): %s\n", pid
 			, uts.nodename);
 
 	if (sethostname(arg, strlen(arg)) == -1) {
@@ -35,12 +52,19 @@ static int new_utsns(void *arg)
 		perror("uname");
 		exit(EXIT_FAILURE);
 	}
+
 	printf("(%d) uts.nodename (after sethostname): %s\n", pid
 			, uts.nodename);
 
+	/* send signal to parent pid to create the second process */
+	kill(getppid(), SIGUSR1);
+
 	printf("(%d) Wait for one more process to enter in the same"
 			" namespace...\n", pid);
-	sleep(3);
+
+	(void)sigwait(&waitset, &sig);
+
+	printf("(%d) Signal received, exiting...\n", pid);
 
 	return 0;
 }
@@ -50,9 +74,9 @@ static int new_proc_same_ns(void *arg)
 	struct utsname uts;
 	char nspath[255];
 	int fd, lpid = getpid();
-	int *pid = (int *)arg;
+	int pid = *(int *)arg;
 
-	if (snprintf(nspath, sizeof(nspath), "/proc/%d/ns/uts", *pid) < 0) {
+	if (snprintf(nspath, sizeof(nspath), "/proc/%d/ns/uts", pid) < 0) {
 		perror("snprintf");
 		exit(EXIT_FAILURE);
 	}
@@ -80,14 +104,19 @@ static int new_proc_same_ns(void *arg)
 		exit(EXIT_FAILURE);
 	}
 
+	/* send signal to child1 to finish execution */
+	kill(pid, SIGUSR1);
+
 	return 0;
 }
 
 int main (int argc, char **argv)
 {
 	pid_t pid[2];
+	struct sigaction sigact;
+	sigset_t waitset;
 	struct utsname uts;
-	int lpid = getpid();
+	int sig, lpid = getpid();
 
 	if (argc != 2) {
 		fprintf(stderr, "Usage: utc new_namespace_hostname\n");
@@ -107,12 +136,17 @@ int main (int argc, char **argv)
 	}
 	printf("(%d) uts.nodename in parent: %s\n", lpid, uts.nodename);
 
+	set_signals(&sigact, &waitset);
+
 	pid[0] = clone(new_utsns, child_stack1 + STACK_SIZE
 			, CLONE_NEWUTS | SIGCHLD, argv[1]);
 	if (pid[0] == -1) {
 		perror("clone1");
 		exit(EXIT_FAILURE);
 	}
+
+	/* wait for pid[0] to set the new hostname before calling pid[1] */
+	(void)sigwait(&waitset, &sig);
 
 	pid[1] = clone(new_proc_same_ns, child_stack2 +STACK_SIZE, SIGCHLD
 			, &(pid[0]));
