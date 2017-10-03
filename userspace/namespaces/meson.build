@@ -1,0 +1,5 @@
+executable('user', 'user.c')
+executable('caps_setuid', 'caps_setuid.c', dependencies: [dep_libcap])
+executable('clone_caps', 'clone_caps.c', dependencies: [dep_libcap])
+executable('uts', 'uts.c', dependencies: [dep_libcap])
+executable('unshare_uts', 'unshare_uts.c', dependencies: [dep_libcap])

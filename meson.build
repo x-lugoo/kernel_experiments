@@ -29,10 +29,4 @@ executable('fs_fat', 'userspace/misc/fs_fat.c')
 executable('netlink_route', 'userspace/misc/netlink_route.c')
 executable('netlink_kobject_uevent', 'userspace/misc/netlink_kobject_uevent.c')
 
-executable('user', 'userspace/namespaces/user.c')
-executable('caps_setuid', 'userspace/namespaces/caps_setuid.c'
-	, dependencies: [dep_libcap])
-executable('clone_caps', 'userspace/namespaces/clone_caps.c'
-	, dependencies: [dep_libcap])
-executable('uts', 'userspace/namespaces/uts.c'
-	, dependencies: [dep_libcap])
+subdir('userspace/namespaces')
