@@ -6,6 +6,8 @@ dep_libinput = dependency('libinput')
 dep_libseccomp = dependency('libseccomp')
 dep_libcap = dependency('libcap')
 
+incdir = include_directories('userspace')
+
 executable('uinput_kb', 'userspace/uinput/uinput_kb.c')
 executable('uinput_mouse', 'userspace/uinput/uinput_mouse.c')
 executable('event_dev_info', 'userspace/uinput/event_dev_info.c')
