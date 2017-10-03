@@ -1,8 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-
 #include <sys/types.h>
+
+#include <helper.h>
 
 void show_info()
 {
@@ -18,10 +19,8 @@ int main(void)
 {
 	show_info();
 
-	if (seteuid(99)) {
-		perror("seteuid 99");
-		exit(EXIT_FAILURE);
-	}
+	if (seteuid(99))
+		fatalErr("seteuid 99");
 
 	show_info();
 

@@ -11,6 +11,8 @@
 #include <sys/wait.h> /* SIGCHLD, wait() */
 #include <unistd.h> /* sethostname, setdomainname() */
 
+#include <helper.h>
+
 #define STACK_SIZE (1024 * 1024)
 static char child_stack1[STACK_SIZE];
 static char child_stack2[STACK_SIZE];
@@ -35,23 +37,17 @@ static int new_utsns(void *arg)
 
 	set_signals(&sigact, &waitset);
 
-	if (uname(&uts) == -1) {
-		perror("uname");
-		exit(EXIT_FAILURE);
-	}
+	if (uname(&uts) == -1)
+		fatalErr("uname");
 
 	printf("(%d) uts.nodename (before sethostname): %s\n", pid
 			, uts.nodename);
 
-	if (sethostname(arg, strlen(arg)) == -1) {
-		perror("sethostname");
-		exit(EXIT_FAILURE);
-	}
+	if (sethostname(arg, strlen(arg)) == -1)
+		fatalErr("sethostname");
 
-	if (uname(&uts) == -1) {
-		perror("uname");
-		exit(EXIT_FAILURE);
-	}
+	if (uname(&uts) == -1)
+		fatalErr("uname");
 
 	printf("(%d) uts.nodename (after sethostname): %s\n", pid
 			, uts.nodename);
@@ -76,33 +72,23 @@ static int new_proc_same_ns(void *arg)
 	int fd, lpid = getpid();
 	int pid = *(int *)arg;
 
-	if (snprintf(nspath, sizeof(nspath), "/proc/%d/ns/uts", pid) < 0) {
-		perror("snprintf");
-		exit(EXIT_FAILURE);
-	}
+	if (snprintf(nspath, sizeof(nspath), "/proc/%d/ns/uts", pid) < 0)
+		fatalErr("snprintf");
 
 	fd = open(nspath, O_RDONLY);
-	if (fd == -1) {
-		perror("open");
-		exit(EXIT_FAILURE);
-	}
+	if (fd == -1)
+		fatalErr("open");
 
-	if (setns(fd, CLONE_NEWUTS) == -1) {
-		perror("setns");
-		exit(EXIT_FAILURE);
-	}
+	if (setns(fd, CLONE_NEWUTS) == -1)
+		fatalErr("setns");
 
-	if (uname(&uts) == -1) {
-		perror("uname");
-		exit(EXIT_FAILURE);
-	}
+	if (uname(&uts) == -1)
+		fatalErr("uname");
 
 	printf("(%d) uts.nodename (inside ns): %s\n", lpid, uts.nodename);
 
-	if (close(fd) == -1) {
-		perror("close");
-		exit(EXIT_FAILURE);
-	}
+	if (close(fd) == -1)
+		fatalErr("close");
 
 	/* send signal to child1 to finish execution */
 	kill(pid, SIGUSR1);
@@ -130,41 +116,31 @@ int main (int argc, char **argv)
 		exit(EXIT_FAILURE);
 	}
 
-	if (uname(&uts) == -1) {
-		perror("uname");
-		exit(EXIT_FAILURE);
-	}
+	if (uname(&uts) == -1)
+		fatalErr("uname");
 	printf("(%d) uts.nodename in parent: %s\n", lpid, uts.nodename);
 
 	set_signals(&sigact, &waitset);
 
 	pid[0] = clone(new_utsns, child_stack1 + STACK_SIZE
 			, CLONE_NEWUTS | SIGCHLD, argv[1]);
-	if (pid[0] == -1) {
-		perror("clone1");
-		exit(EXIT_FAILURE);
-	}
+	if (pid[0] == -1)
+		fatalErr("clone1");
 
 	/* wait for pid[0] to set the new hostname before calling pid[1] */
 	(void)sigwait(&waitset, &sig);
 
 	pid[1] = clone(new_proc_same_ns, child_stack2 +STACK_SIZE, SIGCHLD
 			, &(pid[0]));
-	if (pid[0] == -1) {
-		perror("clone2");
-		exit(EXIT_FAILURE);
-	}
+	if (pid[0] == -1)
+		fatalErr("clone2");
 
 	/* first wait for the second process, which terminates earlier */
-	if (waitpid(pid[1], NULL, 0) == -1) {
-		perror("waitipid1");
-		exit(EXIT_FAILURE);
-	}
+	if (waitpid(pid[1], NULL, 0) == -1)
+		fatalErr("waitpid1");
 
-	if (waitpid(pid[0], NULL, 0) == -1) {
-		perror("waitpid");
-		exit(EXIT_FAILURE);
-	}
+	if (waitpid(pid[0], NULL, 0) == -1)
+		fatalErr("waitpid0");
 
 	printf("(%d) All things set, exiting from parent\n", lpid);
 

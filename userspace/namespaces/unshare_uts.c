@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include <helper.h>
+
 int main(int argc, char **argv)
 {
 	if (argc != 2) {
@@ -12,15 +14,11 @@ int main(int argc, char **argv)
 		exit(EXIT_FAILURE);
 	}
 
-	if (unshare(CLONE_NEWUTS) == -1) {
-		perror("unshare");
-		exit(EXIT_FAILURE);
-	}
+	if (unshare(CLONE_NEWUTS) == -1)
+		fatalErr("unshare");
 
-	if (execvp(argv[1], &argv[1]) == -1) {
-		perror("execvp");
-		exit(EXIT_FAILURE);
-	}
+	if (execvp(argv[1], &argv[1]) == -1)
+		fatalErr("execvp");
 
 	return 0;
 }

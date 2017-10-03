@@ -10,6 +10,8 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+#include <helper.h>
+
 #define STACK_SIZE (1024 * 1024)
 static char child_stack[STACK_SIZE];
 
@@ -18,10 +20,9 @@ static void show_caps()
 	cap_t cap;
 
 	cap = cap_get_proc();
-	if (!cap) {
-		perror("cap_get_proc");
-		return;
-	}
+	if (!cap)
+		fatalErr("cap_get_proc");
+
 	printf("PID: %d, UID: %d, GID: %d\n", getpid(), getuid(), getgid());
 	printf("\tcaps: %s\n", cap_to_text(cap, NULL));
 }
@@ -65,23 +66,17 @@ int main(int argc, char **argv)
 	printf("Parent\n");
 	show_caps();
 
-	if (prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0) <0) {
-		perror("prctl");
-		exit(EXIT_FAILURE);
-	}
+	if (prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0) <0)
+		fatalErr("prctl");
 
 	pid = clone(childFunc, child_stack + STACK_SIZE /* stack growsdownward */
 			, clone_flags, NULL);
 
-	if (pid == -1) {
-		perror("clone");
-		exit(EXIT_FAILURE);
-	}
+	if (pid == -1)
+		fatalErr("clone");
 
-	if (waitpid(pid, NULL, 0) == -1) {
-		perror("waitpid");
-		exit(EXIT_FAILURE);
-	}
+	if (waitpid(pid, NULL, 0) == -1)
+		fatalErr("waitpid");
 
 	return 0;
 }

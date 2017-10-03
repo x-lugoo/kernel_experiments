@@ -8,14 +8,14 @@
 #include <sys/prctl.h>
 #include <sys/types.h>
 
+#include <helper.h>
+
 cap_value_t cap_list[CAP_LAST_CAP+1];
 
 void set_cap(cap_t cap, cap_flag_t flag, cap_flag_value_t flag_val, int num)
 {
-	if (cap_set_flag(cap, flag, num, cap_list, flag_val)) {
-		perror("cap_set_flag");
-		exit(EXIT_FAILURE);
-	}
+	if (cap_set_flag(cap, flag, num, cap_list, flag_val))
+		fatalErr("cap_set_flag");
 }
 
 int main(void)
@@ -28,15 +28,11 @@ int main(void)
 	}
 
 	cap = cap_get_pid(getpid());
-	if (!cap) {
-		perror("cap_get_pid");
-		exit(EXIT_FAILURE);
-	}
+	if (!cap)
+		fatalErr("cap_get_pid");
 
-	if (prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0) < 0) {
-		perror("prctl");
-		exit(EXIT_FAILURE);
-	}
+	if (prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0) < 0)
+		fatalErr("prctl");
 
 	printf("Show cap from privilegied user\n");
 	/* show cap as privilegied user */
