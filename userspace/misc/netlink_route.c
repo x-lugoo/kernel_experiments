@@ -61,7 +61,7 @@ int main(void)
 			exit(EXIT_FAILURE);
 		}
 
-		for (nh = (struct nlmsghdr *)buf; NLMSG_OK(nh, len); nh = NLMSG_NEXT(nh, len)) {
+		for (nh = (struct nlmsghdr *)buf; NLMSG_OK(nh, (unsigned int)len); nh = NLMSG_NEXT(nh, len)) {
 			/* The end of multipart message. */
 			if (nh->nlmsg_type == NLMSG_DONE){
 				printf("got msg done\n");

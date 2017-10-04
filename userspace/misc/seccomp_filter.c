@@ -7,7 +7,7 @@
 int main(void)
 {
 	scmp_filter_ctx ctx = NULL;
-	int ret;
+	int ret = 0;
 
 	printf("Init seccomp ctx to KILL all syscalls\n");
 	ctx = seccomp_init(SCMP_ACT_KILL);
