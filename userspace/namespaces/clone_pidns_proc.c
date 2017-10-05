@@ -19,7 +19,7 @@ static char child_stack[STACK_SIZE];
 
 static int child_func(void *arg)
 {
-	long level = *(long *)arg;
+	long level = (long)arg;
 	char mount_point[PATH_MAX];
 
 	if (getppid() == 0 && level) {
@@ -41,7 +41,7 @@ static int child_func(void *arg)
 		level--;
 
 		pid = clone(child_func, child_stack + STACK_SIZE
-				, CLONE_NEWPID | SIGCHLD, (void *)&level);
+				, CLONE_NEWPID | SIGCHLD, (void *)level);
 
 		if (pid == -1)
 			fatalErr("clone");
@@ -78,8 +78,8 @@ int main(int argc, char **argv)
 {
 	long level;
 
-	level = (argc > 2) ? atoi(argv[1]) : 5;
-	child_func(&level);
+	level = (argc > 1) ? atoi(argv[1]) : 5;
+	child_func((void *)level);
 
 	return 0;
 }
