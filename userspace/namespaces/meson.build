@@ -7,3 +7,5 @@ executable('uts', 'uts.c', dependencies: [dep_libcap]
 	, include_directories: incdir)
 executable('unshare_uts', 'unshare_uts.c', dependencies: [dep_libcap]
 	, include_directories: incdir)
+executable('clone_pidns_proc', 'clone_pidns_proc.c'
+	, include_directories: incdir)
