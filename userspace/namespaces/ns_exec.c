@@ -1,10 +1,14 @@
 #define _GNU_SOURCE
 
+#include <fcntl.h>
 #include <getopt.h>
+#include <limits.h>
 #include <sched.h>
 #include <signal.h>
 #include <stdio.h>
+#include <string.h>
 #include <sys/capability.h>
+#include <sys/eventfd.h>
 #include <sys/mount.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -15,10 +19,38 @@
 #define STACK_SIZE (1024 * 1024)
 static char child_stack[STACK_SIZE];
 
+int wait_fd = -1;
+int val = 1;
+
+/* map user 1000 to user 0 (root) inside namespace */
+static void set_maps(pid_t pid, const char *map) {
+	int fd, data_len;
+	char path[PATH_MAX];
+	char data[] = "0 1000 1";
+
+	if (snprintf(path, PATH_MAX, "/proc/%d/%s", pid, map) < 0)
+		fatalErr("snprintf");
+
+	fd = open(path, O_RDWR);
+	if (fd == -1)
+		fatalErr("open");
+
+	data_len = strlen(data);
+
+	printf("%s\n", map);
+	if (write(fd, data, data_len) != data_len)
+		fatalErr("write");
+}
+
 static int child_func(void *arg)
 {
 	int flags = *(int *)arg;
+	int ret;
 	cap_t cap = cap_get_proc();
+
+	if (flags & CLONE_NEWUSER)
+		/* blocked by parent process */
+		(void)read(wait_fd, &ret, 8);
 
 	printf("PID: %d, PPID: %d\n", getpid(), getppid());
 	printf("eUID: %d, eGID: %d\n", geteuid(), getegid());
@@ -77,11 +109,24 @@ int main(int argc, char **argv)
 		}
 	}
 
+	if (flags & CLONE_NEWUSER) {
+		wait_fd = eventfd(0, EFD_CLOEXEC);
+		if (wait_fd == -1)
+			fatalErr("eventfd");
+	}
+
 	/* stack grows downward */
 	pid = clone(child_func, child_stack + STACK_SIZE, flags
 			, (void *)&flags);
 	if (pid == -1)
 		fatalErr("clone");
+
+	if (flags & CLONE_NEWUSER) {
+		set_maps(pid, "uid_map");
+		// TODO: user proc_setgroups_write
+		//set_maps(pid, "gid_map");
+		(void)write(wait_fd, &val, 8);
+	}
 
 	if (waitpid(pid, NULL, 0) == -1)
 		fatalErr("waitpid");
