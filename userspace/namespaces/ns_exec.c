@@ -4,6 +4,7 @@
 #include <sched.h>
 #include <signal.h>
 #include <stdio.h>
+#include <sys/capability.h>
 #include <sys/mount.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -17,8 +18,12 @@ static char child_stack[STACK_SIZE];
 static int child_func(void *arg)
 {
 	int flags = *(int *)arg;
+	cap_t cap = cap_get_proc();
 
-	printf("Child PID: %d\n", getpid());
+	printf("PID: %d, PPID: %d\n", getpid(), getppid());
+	printf("eUID: %d, eGID: %d\n", geteuid(), getegid());
+	printf("capabilities: %s\n", cap_to_text(cap, NULL));
+
 	if (flags & CLONE_NEWNS) {
 		/* necessary on Fedora, as it mount with propagation enabled
 		 * by default:
