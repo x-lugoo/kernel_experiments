@@ -20,8 +20,13 @@ static int child_func(void *arg)
 
 	printf("Child PID: %d\n", getpid());
 	if (flags & CLONE_NEWNS) {
+		/* necessary on Fedora, as it mount with propagation enabled
+		 * by default:
+		 * https://lwn.net/Articles/635563/
+		 */
 		if (mount(NULL, "/proc", NULL, MS_SLAVE, NULL) < 0)
 			fatalErr("mount slave");
+		/* Now the process only lists the PID's inside the namespace */
 		if (mount("proc", "/proc", "proc", 0, NULL) < 0)
 			fatalErr("mount proc");
 		printf("/proc was made slave and remounted\n");
