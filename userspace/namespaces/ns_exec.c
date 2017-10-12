@@ -19,8 +19,8 @@
 #define STACK_SIZE (1024 * 1024)
 static char child_stack[STACK_SIZE];
 
-int wait_fd = -1;
-int val = 1;
+static int wait_fd = -1;
+static int val = 1;
 
 /* map user 1000 to user 0 (root) inside namespace */
 static void set_maps(pid_t pid, const char *map) {
