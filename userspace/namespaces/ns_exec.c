@@ -54,7 +54,6 @@ static void set_maps(pid_t pid, const char *map) {
 
 	data_len = strlen(data);
 
-	printf("%s\n", map);
 	if (write(fd, data, data_len) != data_len)
 		fatalErr("write");
 }
@@ -98,7 +97,21 @@ int main(int argc, char **argv)
 	int flags = SIGCHLD;
 	int opt;
 
-	while ((opt = getopt(argc, argv, "inmpuU")) != -1) {
+	static struct option long_opt[] = {
+		{"unshare-ipc", no_argument, 0, 'i'},
+		{"unshare-net", no_argument, 0, 'n'},
+		{"unshare-mount", no_argument, 0, 'm'},
+		{"unshare-pid", no_argument, 0, 'p'},
+		{"unshare-uts", no_argument, 0, 'u'},
+		{"unshare-user", no_argument, 0, 'U'},
+		{0, 0, 0, 0},
+	};
+
+	while (1) {
+		opt = getopt_long(argc, argv, "inmpuU", long_opt, NULL);
+		if (opt == -1)
+			break;
+
 		switch (opt) {
 		case 'i':
 			flags |= CLONE_NEWIPC;
@@ -123,6 +136,7 @@ int main(int argc, char **argv)
 					"netns> <-m for newns> <-p for pidns>"
 					" <-u for newuts> ,-U for userns\n"
 					, argv[0]);
+			exit(EXIT_FAILURE);
 		}
 	}
 
