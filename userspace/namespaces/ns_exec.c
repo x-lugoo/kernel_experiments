@@ -1,5 +1,6 @@
 #define _GNU_SOURCE
 
+#include <errno.h>
 #include <fcntl.h>
 #include <getopt.h>
 #include <limits.h>
@@ -27,6 +28,22 @@ static void set_maps(pid_t pid, const char *map) {
 	int fd, data_len;
 	char path[PATH_MAX];
 	char data[] = "0 1000 1";
+
+	if (!strncmp(map, "gid_map", 7)) {
+		if (snprintf(path, PATH_MAX, "/proc/%d/setgroups", pid) < 0)
+			fatalErr("snprintf");
+
+		/* check if setgroups exists, in order to set the group map */
+		fd = open(path, O_RDWR);
+		if (fd == -1 && errno != ENOENT)
+			fatalErr("setgroups");
+
+		if (write(fd, "deny", 5) == -1)
+			fatalErr("write setgroups");
+
+		if (close(fd) == -1)
+			fatalErr("close setgroups");
+	}
 
 	if (snprintf(path, PATH_MAX, "/proc/%d/%s", pid, map) < 0)
 		fatalErr("snprintf");
@@ -123,8 +140,7 @@ int main(int argc, char **argv)
 
 	if (flags & CLONE_NEWUSER) {
 		set_maps(pid, "uid_map");
-		// TODO: user proc_setgroups_write
-		//set_maps(pid, "gid_map");
+		set_maps(pid, "gid_map");
 		(void)write(wait_fd, &val, 8);
 	}
 
