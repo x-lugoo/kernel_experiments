@@ -21,7 +21,10 @@
 static char child_stack[STACK_SIZE];
 
 static int wait_fd = -1;
-static int val = 1;
+static char val = 1;
+
+__attribute__((unused))
+static int ret;
 
 /* map user 1000 to user 0 (root) inside namespace */
 static void set_maps(pid_t pid, const char *map) {
@@ -61,12 +64,11 @@ static void set_maps(pid_t pid, const char *map) {
 static int child_func(void *arg)
 {
 	int flags = *(int *)arg;
-	int ret;
 	cap_t cap = cap_get_proc();
 
 	if (flags & CLONE_NEWUSER)
 		/* blocked by parent process */
-		(void)read(wait_fd, &ret, 8);
+		ret = read(wait_fd, &val, sizeof(char));
 
 	printf("PID: %d, PPID: %d\n", getpid(), getppid());
 	printf("eUID: %d, eGID: %d\n", geteuid(), getegid());
@@ -155,7 +157,7 @@ int main(int argc, char **argv)
 	if (flags & CLONE_NEWUSER) {
 		set_maps(pid, "uid_map");
 		set_maps(pid, "gid_map");
-		(void)write(wait_fd, &val, 8);
+		ret = write(wait_fd, &val, 8);
 	}
 
 	if (waitpid(pid, NULL, 0) == -1)
