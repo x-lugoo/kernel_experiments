@@ -5,8 +5,17 @@ dep_udev = dependency('libudev')
 dep_libinput = dependency('libinput')
 dep_libseccomp = dependency('libseccomp')
 dep_libcap = dependency('libcap')
+dep_bashcomp = dependency('bash-completion')
 
 incdir = include_directories('userspace')
+pkgconfig = find_program('pkg-config')
+runcmd = run_command(pkgconfig
+	, '--define-variable='
+	, '--variable=completiondir'
+	, 'bash-completion')
+
+# assume bash-complete is installed and working
+completiondir = runcmd.stdout().strip()
 
 executable('uinput_kb', 'userspace/uinput/uinput_kb.c')
 executable('uinput_mouse', 'userspace/uinput/uinput_mouse.c')

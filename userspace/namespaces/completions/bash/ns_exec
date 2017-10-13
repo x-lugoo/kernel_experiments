@@ -1,0 +1,22 @@
+#!/bin/bash
+
+_ns_exec() {
+	_init_completion || return
+
+	local boolean_options="
+		--unshare-ipc
+		--unshare-net
+		--unshare-mount
+		--unshare-pid
+		--unshare-uts
+		--unshare-user
+	"
+
+	if [[ "$cur" == -* ]]; then
+		COMPREPLY=($(compgen -W "$boolean_options" -- "$cur"))
+	fi
+
+	return 0
+}
+
+complete -F _ns_exec ns_exec
