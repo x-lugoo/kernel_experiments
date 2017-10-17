@@ -15,7 +15,6 @@
 #include <helper.h>
 
 #define STACK_SIZE (1024 * 1024)
-static char child_stack[STACK_SIZE];
 
 static int child_func(void *arg)
 {
@@ -40,6 +39,10 @@ static int child_func(void *arg)
 
 		level--;
 
+		char *child_stack = malloc(STACK_SIZE);
+		if (!child_stack)
+			fatalErr("malloc");
+
 		pid = clone(child_func, child_stack + STACK_SIZE
 				, CLONE_NEWPID | SIGCHLD, (void *)level);
 
@@ -50,6 +53,8 @@ static int child_func(void *arg)
 				, getppid(), pid);
 		if (waitpid(pid, NULL, 0) == -1)
 			fatalErr("waitpid");
+
+		free(child_stack);
 
 		level++;
 		
