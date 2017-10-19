@@ -2,6 +2,9 @@ project('kernel_experiments', 'c')
 add_project_arguments(['-Wall', '-Werror', '-Wextra'
 		, '-O2', '-fstack-protector-strong', '-D_FORTIFY_SOURCE=2'
 		, '-g', '-I/usr/include/libevdev-1.0'], language: 'c')
+add_project_link_arguments('-fstack-protector-strong'
+		, '-Wl,-z,relro,-z,now', language: 'c')
+
 dep_libevdev = dependency('libevdev')
 dep_udev = dependency('libudev')
 dep_libinput = dependency('libinput')
