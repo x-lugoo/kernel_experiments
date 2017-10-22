@@ -23,6 +23,7 @@ static char child_stack[STACK_SIZE];
 
 static int wait_fd = -1;
 static char val = 1;
+const char *exec_file = NULL;
 
 __attribute__((unused))
 static int ret;
@@ -88,7 +89,10 @@ static int child_func(void *arg)
 		printf("/proc was made slave and remounted\n");
 	}
 
-	if (execlp("/bin/bash", "bash", NULL) == -1)
+	if (!exec_file)
+		exec_file = "/bin/bash";
+
+	if (execlp(exec_file, "ns_exec", NULL) == -1)
 		fatalErr("execlp");
 
 	return 0;
@@ -107,6 +111,7 @@ int main(int argc, char **argv)
 		{"unshare-pid", no_argument, 0, 'p'},
 		{"unshare-uts", no_argument, 0, 'u'},
 		{"unshare-user", no_argument, 0, 'U'},
+		{"exec-file", required_argument, 0, 'e'},
 		{0, 0, 0, 0},
 	};
 
@@ -133,6 +138,9 @@ int main(int argc, char **argv)
 			break;
 		case 'U':
 			flags |= CLONE_NEWUSER;
+			break;
+		case 'e':
+			exec_file = optarg;
 			break;
 		default:
 			fprintf(stderr, "Usage: %s <-i for ipcns> <-n for"
