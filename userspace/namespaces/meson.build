@@ -13,8 +13,5 @@ executable('ns_exec', 'ns_exec.c'
 	, dependencies: [dep_libcap]
 	, include_directories: incdir)
 
-#conf = configuration_data()
-#configure_file(input: 'completions/bash/ns_exec'
-#	, output: 'ns_exec'
-#	, install_dir: completiondir
-#	, configuration: conf)
+install_data(sources: 'completions/bash/ns_exec'
+	, install_dir: completiondir)

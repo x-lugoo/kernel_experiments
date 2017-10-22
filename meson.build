@@ -16,7 +16,7 @@ incdir = include_directories('userspace')
 pkgconfig = find_program('pkg-config')
 runcmd = run_command(pkgconfig
 	, '--define-variable='
-	, '--variable=completiondir'
+	, '--variable=completionsdir'
 	, 'bash-completion')
 
 # assume bash-complete is installed and working
