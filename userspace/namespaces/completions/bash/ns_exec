@@ -10,6 +10,7 @@ _ns_exec() {
 		--unshare-pid
 		--unshare-uts
 		--unshare-user
+		--exec-file
 	"
 
 	if [[ "$cur" == -* ]]; then
