@@ -27,16 +27,16 @@ int main(void)
 		exit(EXIT_FAILURE);
 	}
 
-	cap = cap_get_pid(getpid());
+	cap = cap_get_proc();
 	if (!cap)
-		fatalErr("cap_get_pid");
+		fatalErr("cap_get_proc1");
 
-	if (prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0) < 0)
+	if (prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0) < 0) {
+		cap_free(cap);
 		fatalErr("prctl");
+	}
 
-	printf("Show cap from privilegied user\n");
-	/* show cap as privilegied user */
-	printf("%s\n", cap_to_text(cap, NULL));
+	printf("Show cap from privilegied user\n%s\n", cap_to_text(cap, NULL));
 
 	cap_list[0] = CAP_SETUID;
 	cap_list[1] = CAP_SYS_ADMIN;
@@ -45,16 +45,30 @@ int main(void)
 	set_cap(cap, CAP_PERMITTED, CAP_CLEAR, 2);
 
 	printf("\nRemoving CAP_SETUID and CAP_SYS_ADMIN from root\n");
-	cap_set_proc(cap);
+	if (cap_set_proc(cap) == -1) {
+		cap_free(cap);
+		fatalErr("cap_set_proc");
+	}
+
+	if (cap_free(cap) == -1)
+		fatalErr("cap_free");
+
+	cap = cap_get_proc();
+	if (!cap)
+		fatalErr("cap_get_proc2");
 
 	printf("\nShow caps again\n");
 	printf("%s\n", cap_to_text(cap, NULL));
 
 	if (setuid(99) == 0) {
+		cap_free(cap);
 		printf("user: %d, %d\n", getuid(), geteuid());
 		fprintf(stderr, "ERR: SETUID DIDN'T FAILED\n");
 		exit(EXIT_FAILURE);
 	}
+
+	if (cap_free(cap) == -1)
+		fatalErr("cap_free");
 
 	printf("setuid failed as expected\n");
 
