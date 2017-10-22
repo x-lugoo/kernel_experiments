@@ -11,6 +11,7 @@
 #include <sys/capability.h>
 #include <sys/eventfd.h>
 #include <sys/mount.h>
+#include <sys/prctl.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
@@ -141,6 +142,10 @@ int main(int argc, char **argv)
 			exit(EXIT_FAILURE);
 		}
 	}
+
+	/* avoid acquiring capabilities form the executable file on execlp */
+	if (prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0, 0) == -1)
+		fatalErr("PR_SET_NO_NEW_PRIVS");
 
 	if (flags & CLONE_NEWUSER) {
 		wait_fd = eventfd(0, EFD_CLOEXEC);
