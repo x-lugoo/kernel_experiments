@@ -162,9 +162,11 @@ int main(int argc, char **argv)
 			exec_file = optarg;
 			break;
 		case 'h':
-		default:
 			usage(argv[0]);
 			exit(EXIT_FAILURE);
+		default:
+			/* don't bother with invalid options here */
+			break;
 		}
 	}
 
