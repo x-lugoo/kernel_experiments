@@ -24,6 +24,7 @@ static char child_stack[STACK_SIZE];
 static int wait_fd = -1;
 static char val = 1;
 const char *exec_file = NULL;
+char **global_argv;
 
 __attribute__((unused))
 static int ret;
@@ -66,6 +67,7 @@ static void set_maps(pid_t pid, const char *map) {
 static int child_func(void *arg)
 {
 	int flags = *(int *)arg;
+	const char *argv0;
 	cap_t cap = cap_get_proc();
 
 	if (flags & CLONE_NEWUSER)
@@ -89,11 +91,12 @@ static int child_func(void *arg)
 		printf("/proc was made slave and remounted\n");
 	}
 
-	if (!exec_file)
-		exec_file = "/bin/bash";
+	argv0 = (exec_file) ? exec_file : global_argv[0];
+	if (!argv0)
+		argv0 = "/bin/bash";
 
-	if (execlp(exec_file, "ns_exec", NULL) == -1)
-		fatalErr("execlp");
+	if (execvp(argv0, global_argv) == -1)
+		fatalErr("execvp");
 
 	return 0;
 }
@@ -164,6 +167,9 @@ int main(int argc, char **argv)
 			exit(EXIT_FAILURE);
 		}
 	}
+
+	/* use the unparsed options in execvp later */
+	global_argv = argv + optind;
 
 	/* avoid acquiring capabilities form the executable file on execlp */
 	if (prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0, 0) == -1)
