@@ -105,14 +105,14 @@ static void usage(const char *argv0)
 {
 	fprintf(stderr, "Usage: %s [OPTIONS]\n\n", argv0);
 	fprintf(stderr,
-		"--help			Print this message\n"
-		"--exec-file		Execute the specified file inside the sandbox\n"
-		"--unshare-ipc		Create new IPC namespace\n"
-		"--unshare-net		Create new network namespace\n"
-		"--unshare-mount	Create new mount namespace\n"
-		"--unshare-pid		Create new PID namespace\n"
-		"--unshare-uts		Create new uts namespace\n"
-		"--unshare-user		Create new user namespace\n"
+		"--help                 Print this message\n"
+		"--exec-file            Execute the specified file inside the sandbox\n"
+		"--unshare-ipc          Create new IPC namespace\n"
+		"--unshare-net          Create new network namespace\n"
+		"--unshare-mount        Create new mount namespace\n"
+		"--unshare-pid          Create new PID namespace\n"
+		"--unshare-uts          Create new uts namespace\n"
+		"--unshare-user         Create new user namespace\n"
 	);
 }
 
