@@ -98,6 +98,21 @@ static int child_func(void *arg)
 	return 0;
 }
 
+static void usage(const char *argv0)
+{
+	fprintf(stderr, "Usage: %s [OPTIONS]\n\n", argv0);
+	fprintf(stderr,
+		"--help			Print this message\n"
+		"--exec-file		Execute the specified file inside the sandbox\n"
+		"--unshare-ipc		Create new IPC namespace\n"
+		"--unshare-net		Create new network namespace\n"
+		"--unshare-mount	Create new mount namespace\n"
+		"--unshare-pid		Create new PID namespace\n"
+		"--unshare-uts		Create new uts namespace\n"
+		"--unshare-user		Create new user namespace\n"
+	);
+}
+
 int main(int argc, char **argv)
 {
 	pid_t pid;
@@ -105,13 +120,14 @@ int main(int argc, char **argv)
 	int opt;
 
 	static struct option long_opt[] = {
+		{"exec-file", required_argument, 0, 'e'},
+		{"help", no_argument, 0, 'h'},
 		{"unshare-ipc", no_argument, 0, 'i'},
 		{"unshare-net", no_argument, 0, 'n'},
 		{"unshare-mount", no_argument, 0, 'm'},
 		{"unshare-pid", no_argument, 0, 'p'},
 		{"unshare-uts", no_argument, 0, 'u'},
 		{"unshare-user", no_argument, 0, 'U'},
-		{"exec-file", required_argument, 0, 'e'},
 		{0, 0, 0, 0},
 	};
 
@@ -142,11 +158,9 @@ int main(int argc, char **argv)
 		case 'e':
 			exec_file = optarg;
 			break;
+		case 'h':
 		default:
-			fprintf(stderr, "Usage: %s <-i for ipcns> <-n for"
-					"netns> <-m for newns> <-p for pidns>"
-					" <-u for newuts> ,-U for userns\n"
-					, argv[0]);
+			usage(argv[0]);
 			exit(EXIT_FAILURE);
 		}
 	}
