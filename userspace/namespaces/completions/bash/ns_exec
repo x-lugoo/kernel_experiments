@@ -4,13 +4,14 @@ _ns_exec() {
 	_init_completion || return
 
 	local boolean_options="
+		--exec-file
+		--help
 		--unshare-ipc
 		--unshare-net
 		--unshare-mount
 		--unshare-pid
 		--unshare-uts
 		--unshare-user
-		--exec-file
 	"
 
 	if [[ "$cur" == -* ]]; then
