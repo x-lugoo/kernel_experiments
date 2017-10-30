@@ -1,4 +1,5 @@
-project('kernel_experiments', 'c')
+project('kernel_experiments', 'c'
+	, default_options: ['prefix=/usr'])
 add_project_arguments(['-Wall', '-Werror', '-Wextra'
 		, '-Og', '-fstack-protector-strong', '-D_FORTIFY_SOURCE=2'
 		, '-I/usr/include/libevdev-1.0'], language: 'c')
