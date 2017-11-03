@@ -12,6 +12,7 @@ _ns_exec() {
 		--unshare-pid
 		--unshare-uts
 		--unshare-user
+		--verbose
 	"
 
 	if [[ "$cur" == -* ]]; then
