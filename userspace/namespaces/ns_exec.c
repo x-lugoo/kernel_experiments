@@ -6,6 +6,7 @@
 #include <limits.h>
 #include <sched.h>
 #include <signal.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/capability.h>
@@ -21,6 +22,7 @@
 #define STACK_SIZE (1024 * 1024)
 static char child_stack[STACK_SIZE];
 
+static int enable_verbose = 0;
 static int wait_fd = -1;
 static char val = 1;
 const char *exec_file = NULL;
@@ -28,6 +30,17 @@ char **global_argv;
 
 __attribute__((unused))
 static int ret;
+
+static void verbose(char *fmt, ...)
+{
+	va_list ap;
+
+	if (enable_verbose) {
+		va_start(ap, fmt);
+		vprintf(fmt, ap);
+		va_end(ap);
+	}
+}
 
 /* map user 1000 to user 0 (root) inside namespace */
 static void set_maps(pid_t pid, const char *map) {
@@ -74,9 +87,9 @@ static int child_func(void *arg)
 		/* blocked by parent process */
 		ret = read(wait_fd, &val, sizeof(char));
 
-	printf("PID: %d, PPID: %d\n", getpid(), getppid());
-	printf("eUID: %d, eGID: %d\n", geteuid(), getegid());
-	printf("capabilities: %s\n", cap_to_text(cap, NULL));
+	verbose("PID: %d, PPID: %d\n", getpid(), getppid());
+	verbose("eUID: %d, eGID: %d\n", geteuid(), getegid());
+	verbose("capabilities: %s\n", cap_to_text(cap, NULL));
 
 	if (flags & CLONE_NEWNS) {
 		/* necessary on Fedora, as it mount with propagation enabled
@@ -88,7 +101,7 @@ static int child_func(void *arg)
 		/* Now the process only lists the PID's inside the namespace */
 		if (mount("proc", "/proc", "proc", 0, NULL) < 0)
 			fatalErr("mount proc");
-		printf("/proc was made slave and remounted\n");
+		verbose("/proc was made slave and remounted\n");
 	}
 
 	if (prctl(PR_SET_PDEATHSIG, SIGKILL, 0, 0, 0, 0) == -1)
@@ -116,6 +129,7 @@ static void usage(const char *argv0)
 		"--unshare-pid          Create new PID namespace\n"
 		"--unshare-uts          Create new uts namespace\n"
 		"--unshare-user         Create new user namespace\n"
+		"--verbose              Enable verbose mode\n"
 	);
 }
 
@@ -134,6 +148,7 @@ int main(int argc, char **argv)
 		{"unshare-pid", no_argument, 0, 'p'},
 		{"unshare-uts", no_argument, 0, 'u'},
 		{"unshare-user", no_argument, 0, 'U'},
+		{"verbose", no_argument, 0, 'v'},
 		{0, 0, 0, 0},
 	};
 
@@ -163,6 +178,9 @@ int main(int argc, char **argv)
 			break;
 		case 'e':
 			exec_file = optarg;
+			break;
+		case 'v':
+			enable_verbose = 1;
 			break;
 		case 'h':
 			usage(argv[0]);
