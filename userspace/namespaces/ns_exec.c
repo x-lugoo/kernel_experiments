@@ -91,6 +91,9 @@ static int child_func(void *arg)
 		printf("/proc was made slave and remounted\n");
 	}
 
+	if (prctl(PR_SET_PDEATHSIG, SIGKILL, 0, 0, 0, 0) == -1)
+		fatalErr("prctl PR_SET_PRDEATHSIG");
+
 	argv0 = (exec_file) ? exec_file : global_argv[0];
 	if (!argv0)
 		argv0 = "/bin/bash";
