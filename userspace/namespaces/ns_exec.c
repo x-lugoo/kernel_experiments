@@ -31,7 +31,7 @@ char **global_argv;
 __attribute__((unused))
 static int ret;
 
-static void verbose(char *fmt, ...)
+static inline void verbose(char *fmt, ...)
 {
 	va_list ap;
 
@@ -153,7 +153,7 @@ int main(int argc, char **argv)
 	};
 
 	while (1) {
-		opt = getopt_long(argc, argv, "inmpuU", long_opt, NULL);
+		opt = getopt_long(argc, argv, "inmpuUve:", long_opt, NULL);
 		if (opt == -1)
 			break;
 
