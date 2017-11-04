@@ -42,6 +42,23 @@ static inline void verbose(char *fmt, ...)
 	}
 }
 
+static void handle_mountns(void)
+{
+	/* blocked by parent process */
+	ret = read(wait_fd, &val, sizeof(char));
+
+	/* necessary on Fedora, as it mount with propagation enabled
+	 * by default:
+	 * https://lwn.net/Articles/635563/
+	 */
+	if (mount(NULL, "/", NULL, MS_SLAVE | MS_REC, NULL) < 0)
+		fatalErr("mount recursive slave");
+
+	/* Now the process only lists the PID's inside the namespace */
+	if (mount("proc", "/proc", "proc", 0, NULL) < 0)
+		fatalErr("mount proc");
+}
+
 /* map user 1000 to user 0 (root) inside namespace */
 static void set_maps(pid_t pid, const char *map) {
 	int fd, data_len;
@@ -84,24 +101,7 @@ static int child_func(void *arg)
 	cap_t cap = cap_get_proc();
 
 	if (flags & CLONE_NEWUSER)
-		/* blocked by parent process */
-		ret = read(wait_fd, &val, sizeof(char));
-
-	verbose("PID: %d, PPID: %d\n", getpid(), getppid());
-	verbose("eUID: %d, eGID: %d\n", geteuid(), getegid());
-	verbose("capabilities: %s\n", cap_to_text(cap, NULL));
-
-	if (flags & CLONE_NEWNS) {
-		/* necessary on Fedora, as it mount with propagation enabled
-		 * by default:
-		 * https://lwn.net/Articles/635563/
-		 */
-		if (mount(NULL, "/", NULL, MS_SLAVE | MS_REC, NULL) < 0)
-			fatalErr("mount recursive slave");
-		/* Now the process only lists the PID's inside the namespace */
-		if (mount("proc", "/proc", "proc", 0, NULL) < 0)
-			fatalErr("mount proc");
-	}
+		handle_mountns();
 
 	if (prctl(PR_SET_PDEATHSIG, SIGKILL, 0, 0, 0, 0) == -1)
 		fatalErr("prctl PR_SET_PRDEATHSIG");
@@ -109,6 +109,10 @@ static int child_func(void *arg)
 	argv0 = (exec_file) ? exec_file : global_argv[0];
 	if (!argv0)
 		argv0 = "/bin/bash";
+
+	verbose("PID: %d, PPID: %d\n", getpid(), getppid());
+	verbose("eUID: %d, eGID: %d\n", geteuid(), getegid());
+	verbose("capabilities: %s\n", cap_to_text(cap, NULL));
 
 	if (execvp(argv0, global_argv) == -1)
 		fatalErr("execvp");
