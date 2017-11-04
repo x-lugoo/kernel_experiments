@@ -8,7 +8,6 @@ _ns_exec() {
 		--help
 		--unshare-ipc
 		--unshare-net
-		--unshare-mount
 		--unshare-pid
 		--unshare-uts
 		--unshare-user
