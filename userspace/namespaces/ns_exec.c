@@ -42,7 +42,7 @@ static inline void verbose(char *fmt, ...)
 	}
 }
 
-static void handle_mountns(void)
+static void setup_mountns(void)
 {
 	/* blocked by parent process */
 	ret = read(wait_fd, &val, sizeof(char));
@@ -96,12 +96,11 @@ static void set_maps(pid_t pid, const char *map) {
 
 static int child_func(void *arg)
 {
-	int flags = *(int *)arg;
+	(void)arg;
 	const char *argv0;
 	cap_t cap = cap_get_proc();
 
-	if (flags & CLONE_NEWUSER)
-		handle_mountns();
+	setup_mountns();
 
 	if (prctl(PR_SET_PDEATHSIG, SIGKILL, 0, 0, 0, 0) == -1)
 		fatalErr("prctl PR_SET_PRDEATHSIG");
@@ -128,7 +127,6 @@ static void usage(const char *argv0)
 		"--exec-file            Execute the specified file inside the sandbox\n"
 		"--unshare-ipc          Create new IPC namespace\n"
 		"--unshare-net          Create new network namespace\n"
-		"--unshare-mount        Create new mount namespace\n"
 		"--unshare-pid          Create new PID namespace\n"
 		"--unshare-uts          Create new uts namespace\n"
 		"--unshare-user         Create new user namespace\n"
@@ -139,7 +137,7 @@ static void usage(const char *argv0)
 int main(int argc, char **argv)
 {
 	pid_t pid;
-	int flags = SIGCHLD;
+	int flags = SIGCHLD | CLONE_NEWNS;
 	int opt;
 
 	static struct option long_opt[] = {
@@ -147,7 +145,6 @@ int main(int argc, char **argv)
 		{"help", no_argument, 0, 'h'},
 		{"unshare-ipc", no_argument, 0, 'i'},
 		{"unshare-net", no_argument, 0, 'n'},
-		{"unshare-mount", no_argument, 0, 'm'},
 		{"unshare-pid", no_argument, 0, 'p'},
 		{"unshare-uts", no_argument, 0, 'u'},
 		{"unshare-user", no_argument, 0, 'U'},
@@ -166,9 +163,6 @@ int main(int argc, char **argv)
 			break;
 		case 'n':
 			flags |= CLONE_NEWNET;
-			break;
-		case 'm':
-			flags |= CLONE_NEWNS;
 			break;
 		case 'p':
 			flags |= CLONE_NEWPID;
