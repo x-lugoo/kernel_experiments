@@ -96,12 +96,11 @@ static int child_func(void *arg)
 		 * by default:
 		 * https://lwn.net/Articles/635563/
 		 */
-		if (mount(NULL, "/proc", NULL, MS_SLAVE, NULL) < 0)
-			fatalErr("mount slave");
+		if (mount(NULL, "/", NULL, MS_SLAVE | MS_REC, NULL) < 0)
+			fatalErr("mount recursive slave");
 		/* Now the process only lists the PID's inside the namespace */
 		if (mount("proc", "/proc", "proc", 0, NULL) < 0)
 			fatalErr("mount proc");
-		verbose("/proc was made slave and remounted\n");
 	}
 
 	if (prctl(PR_SET_PDEATHSIG, SIGKILL, 0, 0, 0, 0) == -1)
