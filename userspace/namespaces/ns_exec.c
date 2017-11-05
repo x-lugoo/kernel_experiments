@@ -13,6 +13,8 @@
 #include <sys/eventfd.h>
 #include <sys/mount.h>
 #include <sys/prctl.h>
+#include <sys/stat.h>
+#include <sys/syscall.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
@@ -22,6 +24,7 @@
 #define STACK_SIZE (1024 * 1024)
 static char child_stack[STACK_SIZE];
 
+static char base_path[PATH_MAX];
 static int enable_verbose = 0;
 static int wait_fd = -1;
 static char val = 1;
@@ -47,14 +50,53 @@ static void setup_mountns(void)
 	/* blocked by parent process */
 	ret = read(wait_fd, &val, sizeof(char));
 
-	/* necessary on Fedora, as it mount with propagation enabled
-	 * by default:
-	 * https://lwn.net/Articles/635563/
-	 */
+	/* set / as slave, so changes from here won't be propagated to parent
+	 * namespace */
 	if (mount(NULL, "/", NULL, MS_SLAVE | MS_REC, NULL) < 0)
 		fatalErr("mount recursive slave");
 
-	/* Now the process only lists the PID's inside the namespace */
+	if (mount("", base_path, "tmpfs", MS_NOSUID | MS_NODEV, NULL) < 0)
+		fatalErr("mount tmpfs");
+
+	if (chdir(base_path) == -1)
+		fatalErr("chdir");
+
+	/* prepare pivot_root environment */
+	if (mkdir("newroot", 0755) == -1)
+		fatalErr("newroot");
+
+	if (mkdir("oldroot", 0755) == -1)
+		fatalErr("oldroot");
+
+	/* there is not a wrapper in glibc for pivot_root */
+	if (syscall(__NR_pivot_root, base_path, "oldroot") == -1)
+		fatalErr("pivot_root");
+
+	if (chdir("/") == -1)
+		fatalErr("chdir to new root");
+
+	/* mount bind the oldroot into the new tmpfs */
+	if (mount("/oldroot/", "/newroot/", NULL, MS_BIND | MS_REC, NULL) < 0)
+		fatalErr("mount bind old rootfs");
+
+	/* remount oldroot no not propagate to parent namespace */
+	if (mount("oldroot", "oldroot", NULL, MS_REC | MS_PRIVATE, NULL) < 0)
+		fatalErr("remount oldroot");
+
+	/* apply lazy umount on oldroot */
+	if (umount2("oldroot", MNT_DETACH) < 0)
+		fatalErr("umount2 oldroot");
+
+	if (chdir("/newroot") == -1)
+		fatalErr("chdir newroot");
+
+	if (chroot("/newroot") == -1)
+		fatalErr("chroot newroot");
+
+	if (chdir("/") == -1)
+		fatalErr("chdir /");
+
+	/* remount proc on top of old rootfs proc */
 	if (mount("proc", "/proc", "proc", 0, NULL) < 0)
 		fatalErr("mount proc");
 }
@@ -194,6 +236,13 @@ int main(int argc, char **argv)
 	/* avoid acquiring capabilities form the executable file on execlp */
 	if (prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0, 0) == -1)
 		fatalErr("PR_SET_NO_NEW_PRIVS");
+
+	/* prepare sandbox base dir */
+	if (snprintf(base_path, PATH_MAX, "/tmp/.ns_exec-%d", getuid()) < 0)
+		fatalErr("prepare_tmpfs sprintf");
+
+	if (mkdir(base_path, 0755) == -1 && errno != EEXIST)
+		fatalErr("mkdir base_path err");
 
 	if (flags & CLONE_NEWUSER) {
 		wait_fd = eventfd(0, EFD_CLOEXEC);
