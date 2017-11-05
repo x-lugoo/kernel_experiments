@@ -24,6 +24,7 @@
 #define STACK_SIZE (1024 * 1024)
 static char child_stack[STACK_SIZE];
 
+static int child_args;
 static char base_path[PATH_MAX];
 static int enable_verbose = 0;
 static int wait_fd = -1;
@@ -96,9 +97,11 @@ static void setup_mountns(void)
 	if (chdir("/") == -1)
 		fatalErr("chdir /");
 
-	/* remount proc on top of old rootfs proc */
-	if (mount("proc", "/proc", "proc", 0, NULL) < 0)
-		fatalErr("mount proc");
+	/* if newpid was specified, mount a new proc, or let the /proc mounted
+	 * by rootfs */
+	if (child_args & CLONE_NEWPID)
+		if (mount("proc", "/proc", "proc", 0, NULL) < 0)
+			fatalErr("mount proc");
 }
 
 /* map user 1000 to user 0 (root) inside namespace */
@@ -179,7 +182,7 @@ static void usage(const char *argv0)
 int main(int argc, char **argv)
 {
 	pid_t pid;
-	int flags = SIGCHLD | CLONE_NEWNS;
+	child_args = SIGCHLD | CLONE_NEWNS;
 	int opt;
 
 	static struct option long_opt[] = {
@@ -201,19 +204,19 @@ int main(int argc, char **argv)
 
 		switch (opt) {
 		case 'i':
-			flags |= CLONE_NEWIPC;
+			child_args |= CLONE_NEWIPC;
 			break;
 		case 'n':
-			flags |= CLONE_NEWNET;
+			child_args |= CLONE_NEWNET;
 			break;
 		case 'p':
-			flags |= CLONE_NEWPID;
+			child_args |= CLONE_NEWPID;
 			break;
 		case 'u':
-			flags |= CLONE_NEWUTS;
+			child_args |= CLONE_NEWUTS;
 			break;
 		case 'U':
-			flags |= CLONE_NEWUSER;
+			child_args |= CLONE_NEWUSER;
 			break;
 		case 'e':
 			exec_file = optarg;
@@ -244,19 +247,19 @@ int main(int argc, char **argv)
 	if (mkdir(base_path, 0755) == -1 && errno != EEXIST)
 		fatalErr("mkdir base_path err");
 
-	if (flags & CLONE_NEWUSER) {
+	if (child_args & CLONE_NEWUSER) {
 		wait_fd = eventfd(0, EFD_CLOEXEC);
 		if (wait_fd == -1)
 			fatalErr("eventfd");
 	}
 
 	/* stack grows downward */
-	pid = clone(child_func, child_stack + STACK_SIZE, flags
-			, (void *)&flags);
+	pid = clone(child_func, child_stack + STACK_SIZE, child_args
+			, (void *)&child_args);
 	if (pid == -1)
 		fatalErr("clone");
 
-	if (flags & CLONE_NEWUSER) {
+	if (child_args & CLONE_NEWUSER) {
 		set_maps(pid, "uid_map");
 		set_maps(pid, "gid_map");
 		ret = write(wait_fd, &val, 8);
