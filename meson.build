@@ -6,8 +6,6 @@ add_project_arguments(['-Wall', '-Werror', '-Wextra'
 add_project_link_arguments('-fstack-protector-strong', '-flto'
 		, '-Wl,-z,relro,-z,now', language: 'c')
 
-incdir = include_directories('userspace')
-
 subdir('userspace/libinput')
 subdir('userspace/misc')
 subdir('userspace/namespaces')
