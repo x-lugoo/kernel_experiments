@@ -6,6 +6,7 @@ _ns_exec() {
 	local boolean_options="
 		--exec-file
 		--help
+		--unshare-all
 		--unshare-ipc
 		--unshare-net
 		--unshare-pid

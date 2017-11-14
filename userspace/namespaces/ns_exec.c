@@ -19,7 +19,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-#include <helper.h>
+#include "helper.h"
 
 #define STACK_SIZE (1024 * 1024)
 static char child_stack[STACK_SIZE];
@@ -170,6 +170,7 @@ static void usage(const char *argv0)
 	fprintf(stderr,
 		"--help                 Print this message\n"
 		"--exec-file            Execute the specified file inside the sandbox\n"
+		"--unshare-all          Create all supported namespaces\n"
 		"--unshare-ipc          Create new IPC namespace\n"
 		"--unshare-net          Create new network namespace\n"
 		"--unshare-pid          Create new PID namespace\n"
@@ -188,6 +189,7 @@ int main(int argc, char **argv)
 	static struct option long_opt[] = {
 		{"exec-file", required_argument, 0, 'e'},
 		{"help", no_argument, 0, 'h'},
+		{"unshare-all", no_argument, 0, 'a'},
 		{"unshare-ipc", no_argument, 0, 'i'},
 		{"unshare-net", no_argument, 0, 'n'},
 		{"unshare-pid", no_argument, 0, 'p'},
@@ -203,6 +205,10 @@ int main(int argc, char **argv)
 			break;
 
 		switch (opt) {
+		case 'a':
+			child_args |= CLONE_NEWIPC | CLONE_NEWNET | CLONE_NEWPID
+				| CLONE_NEWUTS | CLONE_NEWUSER;
+			break;
 		case 'i':
 			child_args |= CLONE_NEWIPC;
 			break;
