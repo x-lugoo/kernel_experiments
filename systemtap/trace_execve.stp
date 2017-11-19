@@ -1,0 +1,9 @@
+probe syscall.execve
+{
+	printf("program: %s, args: %s\n", filename, args)
+}
+
+probe timer.s(5)
+{
+	exit()
+}

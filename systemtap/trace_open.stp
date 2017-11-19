@@ -1,0 +1,9 @@
+probe syscall.open
+{
+	printf("executable(pid): %s(%d) parameters: %s\n", execname(), pid(), argstr)
+}
+
+probe timer.s(10)
+{
+	exit()
+}
