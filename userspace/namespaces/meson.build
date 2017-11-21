@@ -4,6 +4,8 @@ executable('ns_exec', 'ns_exec.c'
 	, install: true
 	, dependencies: [dep_libcap])
 
+executable('ns_user_overflow', 'ns_user_overflow.c')
+
 pkgconfig = find_program('pkg-config')
 runcmd = run_command(pkgconfig
 	, '--define-variable='
