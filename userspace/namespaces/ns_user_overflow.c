@@ -7,6 +7,7 @@
 #include <sys/mount.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 
 #include "helper.h"
 
@@ -29,6 +30,12 @@ static int child_func(void *arg)
 
 	printf("UID: %d, GID %d\n", st.st_uid, st.st_gid);
 
+	/* mkdir fails here without a mapped uid/gid */
+	if (mkdir("/tmp/foo/boo", 0755) != -1)
+		fatalErr("mkdir should had failed");
+
+	printf("mkdir failed as expected\n");
+
 	return 0;
 }
 
@@ -41,5 +48,9 @@ int main(void)
 
 	if (pid == -1)
 		fatalErr("clone");
+
+	if (waitpid(pid, NULL, 0) == -1)
+		fatalErr("wait");
+
 	return 0;
 }
