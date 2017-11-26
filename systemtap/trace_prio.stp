@@ -1,6 +1,8 @@
 probe scheduler.process_exit
 {
 	ltask = task_current()
+	# calculate the current prio (in kernel size, it is between 0 and 40)
+	# so, curr_prio - 20 shows the priority as -20 to 19, as nice does
 	printf("Task: %s, pid: %d, priority: %d\n", execname(), task_pid(ltask)
 			, task_prio(ltask) - 20)
 }
