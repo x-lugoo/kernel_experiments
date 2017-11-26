@@ -1,0 +1,6 @@
+probe scheduler.process_exit
+{
+	ltask = task_current()
+	printf("Task: %s, pid: %d, priority: %d\n", execname(), task_pid(ltask)
+			, task_prio(ltask) - 20)
+}
