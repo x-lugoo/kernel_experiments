@@ -40,6 +40,13 @@ ip netns exec $NS ip route add default via $VH_ADDR
 # enable ip forward
 echo 1 > /proc/sys/net/ipv4/ip_forward
 
+# Flush forward rules.
+iptables -P FORWARD DROP
+iptables -F FORWARD
+
+# Flush nat rules.
+iptables -t nat -F
+
 # Add masquerading to host veth
 iptables -t nat -A POSTROUTING -j MASQUERADE
 iptables -A FORWARD -i $HOST_IF -o vHOST -j ACCEPT
