@@ -31,6 +31,7 @@ ip link set vPEER netns $NS
 ip addr add $VH_ADDR/24 dev vHOST
 ip link set vHOST up
 
+ip netns exec $NS ip link set lo up
 ip netns exec $NS ip link set vPEER name eth0
 ip netns exec $NS ip link set eth0 up
 ip netns exec $NS ip addr add $VP_ADDR/24 dev eth0
